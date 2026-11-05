@@ -317,19 +317,67 @@ export class AsaasService {
     }
     return response.json().catch(() => null);
   }
+
+  /**
+   * Estorno (30/10): POST /v3/payments/{id}/refund — corpo vazio = estorno
+   * TOTAL; { value } em REAIS = parcial. Exige SALDO na conta Asaas (padrão
+   * validado no Dr. Exame: sem saldo o Asaas devolve 400). O estorno de um
+   * pagamento com split reverte também os repasses (docs oficiais Asaas).
+   */
+  async refundPayment(paymentId: string, amountBrl?: number): Promise<{ id: string; status: string; value: number | null }> {
+    if (!AsaasService.isConfigured()) {
+      throw new AppError('PAY-023', 400, { message: 'Asaas selecionado mas ASAAS_API_KEY está ausente.', provider: 'ASAAS' });
+    }
+    const id = String(paymentId || '').trim();
+    if (!id) {
+      throw new AppError('PAY-023', 400, { message: 'ID do pagamento Asaas ausente para estorno.', provider: 'ASAAS' });
+    }
+    const partial = Number(amountBrl || 0);
+    const response = await fetch(`${env.asaas.apiBaseUrl}/payments/${encodeURIComponent(id)}/refund`, {
+      method: 'POST',
+      headers: this.buildHeaders(),
+      ...(partial > 0 ? { body: JSON.stringify({ value: partial }) } : {}),
+    });
+    if (!response.ok) {
+      const bodyText = await response.text().catch(() => '');
+      this.log.error('POST refund failed', { status: response.status, paymentId: id, body: bodyText.slice(0, 500) });
+      const insufficientBalance = response.status === 400 && /saldo|balance/i.test(bodyText);
+      throw new AppError('REFUND-030', 400, {
+        message: insufficientBalance
+          ? 'Estorno Asaas exige saldo disponível na conta da plataforma. Regularize o saldo e tente novamente.'
+          : 'Não foi possível estornar o pagamento no Asaas.',
+        providerStatus: response.status,
+        provider: 'ASAAS',
+        details: { body: bodyText.slice(0, 300) },
+      });
+    }
+    const data: any = await response.json().catch(() => null);
+    return {
+      id: String(data?.id || id),
+      status: String(data?.status || 'REFUNDED'),
+      value: Number(data?.value) || null,
+    };
+  }
 }
 
 export type PlatformPixProvider = 'asaas' | 'openpix' | 'mp';
 
+/** Mercado Pago só entra em qualquer cadeia com reativação administrativa (30/10). */
+export const isMercadoPagoEnabled = (): boolean =>
+  env.payments.mpEnabled && env.mercadoPago.accessToken.trim().length > 0;
+
 /**
- * Cadeia de provedores do PIX de plataforma (03/10 Wave Asaas):
+ * Cadeia de provedores do PIX de plataforma (03/10 Wave Asaas; 30/10 gate MP):
  * - PAYMENT_PROVIDER_DEFAULT=asaas → Asaas (se configurado E valor ≥ R$5)
- *   → OpenPix (se configurado) → Mercado Pago (sempre o último).
- * - PAYMENT_PROVIDER_DEFAULT=openpix → OpenPix → MP (Waves 1/2, inalterado).
- * - PAYMENT_PROVIDER_DEFAULT=mp → só MP (default histórico).
- * Cada provedor que falha em runtime cai pro próximo (MP intacto no fim).
+ *   → OpenPix (se configurado) → Mercado Pago (SÓ com PAYMENTS_MP_ENABLED=true).
+ * - PAYMENT_PROVIDER_DEFAULT=openpix → OpenPix → MP (idem gate).
+ * - PAYMENT_PROVIDER_DEFAULT=mp → só MP (e só com o gate ligado; senão cadeia vazia).
+ * Cada provedor que falha em runtime cai pro próximo. Cadeia vazia = PIX de
+ * plataforma indisponível — o chamador precisa refletir isso (erro/UI), nunca
+ * gerar artefato fake de pagamento.
  */
 export const resolvePlatformPixChain = (amountBrl: number): PlatformPixProvider[] => {
+  const mpAllowed = isMercadoPagoEnabled();
   if (env.payments.providerDefault === 'asaas') {
     const chain: PlatformPixProvider[] = [];
     if (AsaasService.isConfigured() && Number(amountBrl) >= ASAAS_MIN_PIX_BRL) {
@@ -338,11 +386,12 @@ export const resolvePlatformPixChain = (amountBrl: number): PlatformPixProvider[
     if (OpenPixService.isConfigured()) {
       chain.push('openpix');
     }
-    chain.push('mp');
+    if (mpAllowed) chain.push('mp');
     return chain;
   }
   if (env.payments.providerDefault === 'openpix') {
-    return OpenPixService.isConfigured() ? ['openpix', 'mp'] : ['mp'];
+    if (!OpenPixService.isConfigured()) return mpAllowed ? ['mp'] : [];
+    return mpAllowed ? ['openpix', 'mp'] : ['openpix'];
   }
-  return ['mp'];
+  return mpAllowed ? ['mp'] : [];
 };

@@ -50,10 +50,10 @@ const { repoMock, mpCreatePayment, accountGetToken, openPixPostBodies, asaasCall
 
 vi.mock('../config/env', () => ({
   env: {
-    payments: { providerDefault: 'asaas' },
+    payments: { providerDefault: 'asaas', mpEnabled: true },
     asaas: { apiKey: 'test-asaas-key', apiBaseUrl: 'https://asaas.test/v3' },
     openpix: { appId: 'test-openpix-app-id', apiBaseUrl: 'https://openpix.test' },
-    mercadoPago: { apiBaseUrl: 'https://api.mp.test' },
+    mercadoPago: { apiBaseUrl: 'https://api.mp.test', accessToken: 'mp-token-test' },
   },
 }));
 
@@ -97,6 +97,7 @@ vi.mock('./PushNotificationService', () => ({
 }));
 
 import { OrderPaymentService } from './OrderPaymentService';
+import { env } from '../config/env';
 
 const jsonResponse = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), {
@@ -306,6 +307,41 @@ describe('createForOrderIfEnabled — WAVE ASAAS (cadeia completa no checkout)',
     expect(openPixPostBodies).toHaveLength(0);
     expect(mpCreatePayment).toHaveBeenCalledTimes(1);
     expect(mpCreatePayment.mock.calls[0][0].method).toBe('CREDIT_CARD');
+  });
+
+  // Gate MP (30/10): Mercado Pago é contingência DESATIVADA. Sem reativação
+  // administrativa o fallback MP da loja NÃO acontece — cadeia interia falha →
+  // linha removida, pedido segue sem pagamento online (sem PENDING fantasma).
+  it('MP DESATIVADO + Asaas/OpenPix fora → SEM fallback MP: linha removida e row null', async () => {
+    env.payments.mpEnabled = false;
+    try {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async () => jsonResponse(500, { error: 'down' }))
+      );
+      const service = new OrderPaymentService();
+      const row = await service.createForOrderIfEnabled(order);
+
+      expect(row).toBeNull();
+      expect(repoMock.delete).toHaveBeenCalledWith('op-1');
+      expect(mpCreatePayment).not.toHaveBeenCalled();
+    } finally {
+      env.payments.mpEnabled = true;
+    }
+  });
+
+  it('MP DESATIVADO → cartão fica INDISPONÍVEL (row null, nenhuma cobrança criada)', async () => {
+    env.payments.mpEnabled = false;
+    try {
+      stubPlatformFetch();
+      const service = new OrderPaymentService();
+      const row = await service.createForOrderIfEnabled({ ...order, paymentMethod: 'credito' });
+
+      expect(row).toBeNull();
+      expect(mpCreatePayment).not.toHaveBeenCalled();
+    } finally {
+      env.payments.mpEnabled = true;
+    }
   });
 });
 

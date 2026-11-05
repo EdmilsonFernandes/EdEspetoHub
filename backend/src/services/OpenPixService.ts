@@ -192,6 +192,56 @@ export class OpenPixService {
     const data: any = await response.json();
     return data?.charge ?? null;
   }
+
+  /**
+   * Estorno (30/10): POST /api/v1/charge/{correlationID}/refund com body
+   * { correlationID (idempotência DO ESTORNO), value (CENTAVOS), comment }.
+   * correlationID do refund é determinístico (`refund:{chargeID}`) — retry de
+   * rede não estorna duas vezes (regra oficial: mesmo correlationID = mesmo
+   * resultado). Reembolso é gratuito na OpenPix (página oficial de preços).
+   */
+  async refundCharge(correlationID: string, valueBrlCents?: number, comment?: string): Promise<{ id: string; status: string; value: number | null }> {
+    if (!OpenPixService.isConfigured()) {
+      throw new AppError('PAY-015', 400, { message: 'OpenPix selecionado mas OPENPIX_APP_ID está ausente.', provider: 'OPENPIX' });
+    }
+    const chargeId = sanitizeToOpenPixAscii(correlationID);
+    if (!chargeId) {
+      throw new AppError('PAY-015', 400, { message: 'correlationID ausente para estorno OpenPix.' });
+    }
+    const value = Math.round(Number(valueBrlCents || 0));
+    if (!(value > 0)) {
+      throw new AppError('PAY-015', 400, { message: 'Valor do estorno OpenPix deve ser > 0 (em centavos).' });
+    }
+    const response = await fetch(
+      `${env.openpix.apiBaseUrl}/api/v1/charge/${encodeURIComponent(chargeId)}/refund`,
+      {
+        method: 'POST',
+        headers: this.buildHeaders(),
+        body: JSON.stringify({
+          correlationID: `refund:${chargeId}`.slice(0, 100),
+          value,
+          ...(comment ? { comment: sanitizeToOpenPixAscii(comment).slice(0, 140) } : {}),
+        }),
+      }
+    );
+    if (!response.ok) {
+      const bodyText = await response.text().catch(() => '');
+      this.log.error('POST refund failed', { status: response.status, correlationID: chargeId, body: bodyText.slice(0, 500) });
+      throw new AppError('REFUND-031', 400, {
+        message: 'Não foi possível estornar a cobrança no OpenPix.',
+        providerStatus: response.status,
+        provider: 'OPENPIX',
+        details: { body: bodyText.slice(0, 300) },
+      });
+    }
+    const data: any = await response.json();
+    const refund = data?.refund ?? data;
+    return {
+      id: String(refund?.id || refund?.correlationID || `refund:${chargeId}`),
+      status: String(refund?.status || 'PENDING'),
+      value: Number(refund?.value) || null,
+    };
+  }
 }
 
 /**

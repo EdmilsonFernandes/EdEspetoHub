@@ -3,8 +3,9 @@ import { env } from '../config/env';
 import { PromoPush } from '../entities/PromoPush';
 import { Store } from '../entities/Store';
 import { AppError } from '../errors/AppError';
-import { MercadoPagoService } from './MercadoPagoService';
-import { OpenPixService, isOpenPixPlatformPixEnabled, toOpenPixCents } from './OpenPixService';
+import { AsaasService, isMercadoPagoEnabled } from './AsaasService';
+import { OpenPixService } from './OpenPixService';
+import { createPlatformPixCharge } from './PlatformPixService';
 import { PushNotificationService } from './PushNotificationService';
 import { logger } from '../utils/logger';
 
@@ -13,8 +14,8 @@ const log = logger.child({ scope: 'PromoPushService' });
 
 export class PromoPushService {
   private repo = AppDataSource.getRepository(PromoPush);
-  private mercadoPago = new MercadoPagoService();
   private openPix = new OpenPixService();
+  private asaas = new AsaasService();
   private pushService = new PushNotificationService();
 
   async create(storeId: string, authStoreId: string | undefined, body: { title: string; message: string }) {
@@ -41,79 +42,34 @@ export class PromoPushService {
     });
     const created = await this.repo.save(row);
 
-    // Criar pagamento MP da plataforma
-    const mpEnabled = Boolean(env.mercadoPago.accessToken);
-    const ownerEmail = String(store.owner?.email || '').trim();
-    // Nunca usar email da propria plataforma (smtpUser/contato@): MP rejeita (4390 Payer email forbidden).
-    const payerEmail = ownerEmail;
-    const payerName = String(store.owner?.fullName || store.name || 'Lojista').trim();
+    // PIX de plataforma — cadeia única (30/10): Asaas (≥R$5+CPF) → OpenPix →
+    // MP apenas com reativação administrativa. Erro de um provedor → próximo;
+    // todos indisponíveis → AppError PAY-016 (nunca QR fake).
+    const owner = store.owner as any;
+    const ownerEmail = String(owner?.email || '').trim();
+    const payerName = String(owner?.fullName || store.name || 'Lojista').trim();
+    const payerCpf = String(
+      String(owner?.documentType || '').toUpperCase() === 'CPF' ? owner?.document || '' : ''
+    ).trim();
 
-    let providerId: string | null = null;
-    let paymentLink: string | null = null;
-    let qrCodeBase64: string | null = null;
-    let qrCodeText: string | null = null;
-    let providerExpiresAt: Date | null = expiresAt;
-    let provider: string | null = null;
+    const charge = await createPlatformPixCharge({
+      externalReference: `promo_push:${created.id}`,
+      amountBrl: PROMO_PUSH_PRICE,
+      comment: `Push Promocional - ${store.name}`,
+      payer: {
+        name: payerName,
+        email: ownerEmail || undefined,
+        ...(payerCpf ? { cpfCnpj: payerCpf } : {}),
+      },
+      expiresInSec: 30 * 60,
+    });
 
-    // WAVE 1 OpenPix: PIX de plataforma (sempre token da plataforma neste fluxo).
-    if (isOpenPixPlatformPixEnabled()) {
-      try {
-        const charge = await this.openPix.createCharge({
-          correlationID: `promo_push:${created.id}`,
-          valueBrlCents: toOpenPixCents(PROMO_PUSH_PRICE),
-          expiresInSec: 30 * 60,
-          comment: `Push Promocional - ${store.name}`,
-        });
-        provider = 'OPENPIX';
-        providerId = charge.providerId;
-        paymentLink = null;
-        qrCodeBase64 = charge.qrCodeImageBase64;
-        qrCodeText = charge.brCode;
-        if (charge.expiresAt) providerExpiresAt = charge.expiresAt;
-      } catch (error) {
-        log.warn('OpenPix charge failed for promo push, falling back to Mercado Pago', {
-          pushId: created.id,
-          error,
-        });
-      }
-    }
-
-    if (!qrCodeText && mpEnabled && payerEmail) {
-      const mp: any = await this.mercadoPago.createPayment({
-        amount: PROMO_PUSH_PRICE,
-        method: 'PIX',
-        description: `Push Promocional - ${store.name}`,
-        externalReference: `promo_push:${created.id}`,
-        payer: { email: payerEmail, name: payerName },
-      });
-      providerId = String(mp?.providerId || '');
-      paymentLink = mp?.paymentLink || null;
-      qrCodeBase64 = mp?.qrCodeBase64
-        ? (String(mp.qrCodeBase64).startsWith('data:image') ? mp.qrCodeBase64 : `data:image/png;base64,${mp.qrCodeBase64}`)
-        : null;
-      qrCodeText = mp?.qrCodeText || null;
-      provider = 'MERCADO_PAGO';
-      if (mp?.expiresAt) {
-        const parsed = new Date(mp.expiresAt);
-        if (Number.isFinite(parsed.getTime())) providerExpiresAt = parsed;
-      }
-    }
-
-    // Nunca gerar QR Pix falso: propagar erro claro se o provedor nao retornou payload valido.
-    if (!qrCodeText) {
-      throw new AppError('PAY-016', 400, {
-        message: mpEnabled
-          ? 'Nao foi possivel gerar o QR Pix do push promocional no Mercado Pago. Verifique a configuracao de pagamento (webhook/token) e tente novamente.'
-          : 'Pagamento online nao configurado. Nao e possivel gerar o QR Pix do push agora.',
-      });
-    }
-
-    created.paymentProvider = provider;
-    created.paymentProviderId = providerId;
-    created.paymentLink = paymentLink;
-    created.paymentQrCodeBase64 = qrCodeBase64;
-    created.paymentQrCodeText = qrCodeText;
-    created.paymentExpiresAt = providerExpiresAt;
+    created.paymentProvider = charge.provider;
+    created.paymentProviderId = charge.providerId;
+    created.paymentLink = charge.paymentLink;
+    created.paymentQrCodeBase64 = charge.qrCodeImageBase64;
+    created.paymentQrCodeText = charge.brCode;
+    if (charge.expiresAt) created.paymentExpiresAt = charge.expiresAt;
     await this.repo.save(created);
 
     return this.serialize(created);
@@ -153,6 +109,26 @@ export class PromoPushService {
     if (!row) throw new AppError('NOT-001', 404);
     if (!row.paymentProviderId) return this.serialize(row);
 
+    // ASAAS (30/10): polling por payment.id — RECEIVED/CONFIRMED/RECEIVED_IN_CASH = pago.
+    if (String(row.paymentProvider || '').toUpperCase() === 'ASAAS') {
+      try {
+        const charge = await this.asaas.getCharge(row.paymentProviderId);
+        const providerStatus = String(charge?.status || '').toUpperCase();
+        if (['RECEIVED', 'CONFIRMED', 'RECEIVED_IN_CASH'].includes(providerStatus)) {
+          row.paymentStatus = 'PAID';
+          row.paymentPaidAt = new Date();
+          row.status = 'PENDING_APPROVAL';
+          await this.repo.save(row);
+        } else if (providerStatus === 'OVERDUE' || providerStatus === 'REFUNDED') {
+          row.paymentStatus = 'FAILED';
+          await this.repo.save(row);
+        }
+      } catch (err) {
+        log.warn('PromoPush Asaas refresh payment failed', { pushId, error: err });
+      }
+      return this.serialize(row);
+    }
+
     // WAVE 1 OpenPix: polling por correlationID.
     if (String(row.paymentProvider || '').toUpperCase() === 'OPENPIX') {
       try {
@@ -173,7 +149,8 @@ export class PromoPushService {
       return this.serialize(row);
     }
 
-    if (!env.mercadoPago.accessToken) return this.serialize(row);
+    // MP é contingência desativada: polling legado só com reativação explícita.
+    if (!isMercadoPagoEnabled()) return this.serialize(row);
 
     try {
       const response = await fetch(`${env.mercadoPago.apiBaseUrl}/v1/payments/${row.paymentProviderId}`, {

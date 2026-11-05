@@ -6,8 +6,10 @@ import { Store } from '../entities/Store';
 import { User } from '../entities/User';
 import { AppError } from '../errors/AppError';
 import { logger } from '../utils/logger';
+import { AsaasService, isMercadoPagoEnabled } from './AsaasService';
 import { MercadoPagoService } from './MercadoPagoService';
-import { OpenPixService, isOpenPixPlatformPixEnabled, toOpenPixCents } from './OpenPixService';
+import { OpenPixService } from './OpenPixService';
+import { createPlatformPixCharge } from './PlatformPixService';
 import { PaymentAuditService } from './PaymentAuditService';
 import { PAYMENT_AUDIT_ENTITY, PAYMENT_AUDIT_FLOW, PAYMENT_AUDIT_STAGE } from '../utils/paymentAudit';
 import { isMercadoPagoApprovedStatus, isMercadoPagoFailedStatus, isMercadoPagoPendingStatus } from '../utils/mercadoPagoStatus';
@@ -33,6 +35,7 @@ export class FeaturedProductService {
   private repo = AppDataSource.getRepository(FeaturedProductRequest);
   private mercadoPago = new MercadoPagoService();
   private openPix = new OpenPixService();
+  private asaas = new AsaasService();
   private paymentAuditService = new PaymentAuditService();
   private log = logger.child({ scope: 'FeaturedProductService' });
 
@@ -225,95 +228,82 @@ export class FeaturedProductService {
     });
     const created = (await this.repo.save(row)) as FeaturedProductRequest;
 
-    let provider = 'MOCK';
-    let providerId: string | null = null;
-    let paymentLink: string | null = null;
-    let qrCodeBase64: string | null = null;
-    let qrCodeText: string | null = null;
-    let providerExpiresAt: Date | null = expiresAt;
-
-    const mpEnabled = Boolean(env.mercadoPago.accessToken);
-    // Email deterministico e unico: nunca o dono da conta MP (evita 4390 "Payer email forbidden"
-    // quando o proprio dono da plataforma testa o destaque da sua loja). O email do pagador nao
-    // afeta a receita da taxa de destaque (vai pro MP da plataforma).
+    // Email deterministico e unico (evita 4390 "Payer email forbidden" no MP).
     const payerEmail = `destaque+${created.id}@janocaminho.com.br`;
     const payerName = String(user?.fullName || store?.owner?.fullName || store?.name || 'Cliente').trim();
+    const payerAny = user as any;
+    const payerCpf = String(
+      String(payerAny?.documentType || '').toUpperCase() === 'CPF' ? payerAny?.document || '' : ''
+    ).trim();
 
-    if (mpEnabled && payerEmail) {
-      const description = `Destaque Hub ${durationUnit} - ${store.name}`;
-      // WAVE 1 OpenPix: PIX de plataforma. Cartão segue Mercado Pago (intacto).
-      if (paymentMethod === 'PIX' && isOpenPixPlatformPixEnabled()) {
-        try {
-          const charge = await this.openPix.createCharge({
-            correlationID: `featured_request:${created.id}`,
-            valueBrlCents: toOpenPixCents(amount),
-            expiresInSec: 30 * 60,
-            comment: description,
-          });
-          provider = 'OPENPIX';
-          providerId = charge.providerId;
-          paymentLink = null;
-          qrCodeBase64 = charge.qrCodeImageBase64;
-          qrCodeText = charge.brCode;
-          if (charge.expiresAt) providerExpiresAt = charge.expiresAt;
-        } catch (error) {
-          this.log.warn('OpenPix charge failed for featured request, falling back to Mercado Pago', {
-            requestId: created.id,
-            error,
-          });
-        }
-      }
-      if (provider !== 'OPENPIX') {
-        const mp: any = await this.mercadoPago.createPayment({
-          amount,
-          method: paymentMethod,
-          description,
-          externalReference: `featured_request:${created.id}`,
-          payer: {
-            email: payerEmail,
-            name: payerName,
-          },
-          auditContext: {
-            flowType: PAYMENT_AUDIT_FLOW.FEATURED_REQUEST,
-            entityType: PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST,
-            entityId: created.id,
-            storeId,
-            externalReference: `featured_request:${created.id}`,
-            eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
-          },
-        });
-        provider = 'MERCADO_PAGO';
-        providerId = String(mp?.providerId || '');
-        paymentLink = mp?.paymentLink || null;
-        qrCodeBase64 = mp?.qrCodeBase64
-          ? (String(mp.qrCodeBase64).startsWith('data:image') ? mp.qrCodeBase64 : `data:image/png;base64,${mp.qrCodeBase64}`)
-          : null;
-        qrCodeText = mp?.qrCodeText || null;
-        if (mp?.expiresAt) {
-          const parsed = new Date(mp.expiresAt);
-          providerExpiresAt = Number.isFinite(parsed.getTime()) ? parsed : providerExpiresAt;
-        }
-      }
+    // PIX de plataforma — cadeia única (30/10): Asaas (≥R$5+CPF) → OpenPix →
+    // MP apenas com reativação administrativa. Todos indisponíveis → PAY-016.
+    if (paymentMethod === 'PIX') {
+      const charge = await createPlatformPixCharge({
+        externalReference: `featured_request:${created.id}`,
+        amountBrl: amount,
+        comment: `Destaque Hub ${durationUnit} - ${store.name}`,
+        payer: {
+          name: payerName,
+          email: payerEmail,
+          ...(payerCpf ? { cpfCnpj: payerCpf } : {}),
+        },
+        expiresInSec: 30 * 60,
+        mpAuditContext: {
+          flowType: PAYMENT_AUDIT_FLOW.FEATURED_REQUEST,
+          entityType: PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST,
+          entityId: created.id,
+          storeId,
+        },
+      });
+      created.paymentProvider = charge.provider;
+      created.paymentProviderId = charge.providerId;
+      created.paymentLink = charge.paymentLink;
+      created.paymentQrCodeBase64 = charge.qrCodeImageBase64;
+      created.paymentQrCodeText = charge.brCode;
+      created.paymentExpiresAt = charge.expiresAt || expiresAt;
+      await this.repo.save(created);
+      return created;
     }
 
-    // Nunca gerar QR Pix falso: se o provedor nao retornou payload valido, propagar erro claro.
-    if (paymentMethod === 'PIX' && !qrCodeText) {
+    // Cartão: único provedor é o Mercado Pago — contingência DESATIVADA por
+    // padrão. Sem reativação explícita não existe checkout de cartão: erro
+    // claro (nunca o link fake pay.janocaminho.com/checkout/...).
+    if (!isMercadoPagoEnabled()) {
       throw new AppError('PAY-016', 400, {
-        message: mpEnabled
-          ? 'Nao foi possivel gerar o QR Pix do destaque no Mercado Pago. Verifique a configuracao de pagamento (webhook/token) e tente novamente.'
-          : 'Pagamento online nao configurado. Nao e possivel gerar o QR Pix do destaque agora.',
+        message: 'Pagamento por cartão indisponível no momento. Use o Pix para contratar o destaque.',
       });
     }
-    if (paymentMethod === 'CREDIT_CARD' && !paymentLink) {
-      paymentLink = `https://pay.janocaminho.com/checkout/featured/${created.id}`;
+    const description = `Destaque Hub ${durationUnit} - ${store.name}`;
+    const mp: any = await this.mercadoPago.createPayment({
+      amount,
+      method: paymentMethod,
+      description,
+      externalReference: `featured_request:${created.id}`,
+      payer: {
+        email: payerEmail,
+        name: payerName,
+      },
+      auditContext: {
+        flowType: PAYMENT_AUDIT_FLOW.FEATURED_REQUEST,
+        entityType: PAYMENT_AUDIT_ENTITY.FEATURED_REQUEST,
+        entityId: created.id,
+        storeId,
+        externalReference: `featured_request:${created.id}`,
+        eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
+      },
+    });
+    created.paymentProvider = 'MERCADO_PAGO';
+    created.paymentProviderId = String(mp?.providerId || '');
+    created.paymentLink = mp?.paymentLink || null;
+    created.paymentQrCodeBase64 = mp?.qrCodeBase64
+      ? (String(mp.qrCodeBase64).startsWith('data:image') ? mp.qrCodeBase64 : `data:image/png;base64,${mp.qrCodeBase64}`)
+      : null;
+    created.paymentQrCodeText = mp?.qrCodeText || null;
+    if (mp?.expiresAt) {
+      const parsed = new Date(mp.expiresAt);
+      created.paymentExpiresAt = Number.isFinite(parsed.getTime()) ? parsed : expiresAt;
     }
-
-    created.paymentProvider = provider;
-    created.paymentProviderId = providerId;
-    created.paymentLink = paymentLink;
-    created.paymentQrCodeBase64 = qrCodeBase64;
-    created.paymentQrCodeText = qrCodeText;
-    created.paymentExpiresAt = providerExpiresAt;
     await this.repo.save(created);
 
     return created;
@@ -358,7 +348,60 @@ export class FeaturedProductService {
 
     const provider = normalizeStatus(current.paymentProvider || undefined);
     const providerId = String(current.paymentProviderId || '').trim();
-    if (provider !== 'MERCADO_PAGO' || !providerId || !env.mercadoPago.accessToken) {
+    if (!providerId) return current;
+
+    // ASAAS (30/10): polling por payment.id — webhook perdido não trava o destaque.
+    if (provider === 'ASAAS') {
+      try {
+        const charge = await this.asaas.getCharge(providerId);
+        const providerStatus = String(charge?.status || '').toUpperCase();
+        if (providerStatus === 'RECEIVED' || providerStatus === 'CONFIRMED' || providerStatus === 'RECEIVED_IN_CASH') {
+          await this.markPaidFromWebhook(requestId, {
+            status: 'approved',
+            status_detail: `asaas_${providerStatus.toLowerCase()}`,
+            id: providerId,
+            transaction_amount: Number(charge?.value || 0),
+          }, 'ASAAS');
+        } else if (providerStatus === 'REFUNDED') {
+          await this.markFailedFromWebhook(requestId, { status: 'refunded', id: providerId }, 'ASAAS');
+        }
+      } catch {
+        // mantém estado atual — reconciliação por webhook segue válida
+      }
+      const asaasLatest = await this.repo.findOne({
+        where: { id: requestId },
+        relations: ['store', 'product', 'requestedByUser'],
+      });
+      return asaasLatest || current;
+    }
+
+    // OPENPIX: polling por correlationID (completava só via webhook antes).
+    if (provider === 'OPENPIX') {
+      try {
+        const charge = await this.openPix.getCharge(providerId);
+        const providerStatus = String(charge?.status || '').toUpperCase();
+        if (providerStatus === 'COMPLETED') {
+          await this.markPaidFromWebhook(requestId, {
+            status: 'approved',
+            status_detail: 'openpix_completed',
+            id: String(charge?.correlationID || providerId),
+            transaction_amount: Number(charge?.value || 0) / 100,
+          }, 'OPENPIX');
+        } else if (providerStatus === 'EXPIRED') {
+          await this.markFailedFromWebhook(requestId, { status: 'cancelled', id: providerId }, 'OPENPIX');
+        }
+      } catch {
+        // mantém estado atual
+      }
+      const openpixLatest = await this.repo.findOne({
+        where: { id: requestId },
+        relations: ['store', 'product', 'requestedByUser'],
+      });
+      return openpixLatest || current;
+    }
+
+    // MP é contingência desativada: polling legado só com reativação explícita.
+    if (provider !== 'MERCADO_PAGO' || !isMercadoPagoEnabled()) {
       return current;
     }
 

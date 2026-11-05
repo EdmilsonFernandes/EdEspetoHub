@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { Suspense, lazy, useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -203,7 +204,18 @@ function App() {
               {ReuiShowcase && (
                 <Route path="/dev/reui" element={<ReuiShowcase />} />
               )}
-              <Route path="/" element={isAppSubdomainHost ? <LandingPage /> : <EmpresaJanoCaminhoPage />} />
+              <Route
+                path="/"
+                element={
+                  Capacitor.isNativePlatform() ? (
+                    <Navigate to="/hub" replace />
+                  ) : isAppSubdomainHost ? (
+                    <LandingPage />
+                  ) : (
+                    <EmpresaJanoCaminhoPage />
+                  )
+                }
+              />
               <Route path="/app" element={<LandingPage />} />
               <Route path="/conheca-o-app" element={<LandingPage />} />
               <Route path="/parceiros" element={<PartnersPage />} />

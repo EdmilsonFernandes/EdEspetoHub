@@ -252,23 +252,23 @@ const KycAvatar = ({ name, profileImageUrl }: { name?: string; profileImageUrl?:
 };
 
 const PlatformRobotLoader = ({ logoSrc = '/janocaminho.jpg' }) => (
-  <div className="relative overflow-hidden rounded-[1.7rem] border border-[#336886]/12 bg-white p-4 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.45)]">
+  <div className="relative overflow-hidden rounded-[1.7rem] border border-[#2563EB]/12 bg-white p-4 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.45)]">
     <div className="absolute -right-10 -top-14 h-32 w-32 rounded-full bg-[#5FD35A]/18 blur-3xl" />
-    <div className="absolute -bottom-12 left-8 h-28 w-28 rounded-full bg-[#336886]/14 blur-3xl" />
+    <div className="absolute -bottom-12 left-8 h-28 w-28 rounded-full bg-[#2563EB]/14 blur-3xl" />
     <div className="relative flex items-center gap-3">
-      <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.25rem] bg-[linear-gradient(145deg,#153A4C,#336886)] shadow-[0_20px_42px_-28px_rgba(21,58,76,0.9)]">
+      <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.25rem] bg-[linear-gradient(145deg,#153A4C,#2563EB)] shadow-[0_20px_42px_-28px_rgba(21,58,76,0.9)]">
         <span className="absolute -top-2 left-1/2 h-4 w-[2px] -translate-x-1/2 rounded-full bg-[#5FD35A]/80" />
         <span className="absolute left-[17px] top-[17px] h-1.5 w-1.5 animate-pulse rounded-full bg-[#5FD35A] shadow-[0_0_12px_rgba(95,211,90,0.9)]" />
         <span className="absolute right-[17px] top-[17px] h-1.5 w-1.5 animate-pulse rounded-full bg-[#5FD35A] shadow-[0_0_12px_rgba(95,211,90,0.9)]" />
         <img src={logoSrc} alt="Já no Caminho" className="mt-3 h-7 w-7 rounded-lg object-cover ring-1 ring-white/50" />
       </div>
       <div className="min-w-0">
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#336886]">Resumo da plataforma</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2563EB]">Resumo da plataforma</p>
         <p className="mt-1 text-sm font-black text-slate-900">Carregando indicadores...</p>
         <p className="mt-0.5 text-xs font-semibold text-slate-500">Buscando vendas, lojas, planos e pagamentos sem travar a tela.</p>
       </div>
       <div className="ml-auto hidden items-center gap-1 sm:flex">
-        <span className="h-2 w-2 animate-bounce rounded-full bg-[#336886]" />
+        <span className="h-2 w-2 animate-bounce rounded-full bg-[#2563EB]" />
         <span className="h-2 w-2 animate-bounce rounded-full bg-[#5FD35A] [animation-delay:120ms]" />
         <span className="h-2 w-2 animate-bounce rounded-full bg-[#8EC5DD] [animation-delay:240ms]" />
       </div>
@@ -285,7 +285,7 @@ const SECTION_META: Record<string, { title: string; description: string; tone: s
   rankings: {
     title: 'Rankings',
     description: 'Comparativo de lojas por receita e volume de pedidos.',
-    tone: 'from-[#153A4C] to-[#336886] text-white border-[#336886]',
+    tone: 'from-[#153A4C] to-[#2563EB] text-white border-[#2563EB]',
   },
   stores: {
     title: 'Lojas e performance',
@@ -295,7 +295,7 @@ const SECTION_META: Record<string, { title: string; description: string; tone: s
   payments: {
     title: 'Pagamentos',
     description: 'Acompanhamento financeiro, status e reconciliação.',
-    tone: 'from-[#0d3347] to-[#336886] text-white border-[#336886]',
+    tone: 'from-[#0d3347] to-[#2563EB] text-white border-[#2563EB]',
   },
   security: {
     title: 'Segurança de clientes',
@@ -320,7 +320,7 @@ const SECTION_META: Record<string, { title: string; description: string; tone: s
   kyc: {
     title: 'KYC de entregadores',
     description: 'Validação documental, score facial e decisões da plataforma.',
-    tone: 'from-[#153A4C] to-[#336886] text-white border-[#336886]',
+    tone: 'from-[#153A4C] to-[#2563EB] text-white border-[#2563EB]',
   },
   versions: {
     title: 'Versões',
@@ -330,12 +330,12 @@ const SECTION_META: Record<string, { title: string; description: string; tone: s
   push: {
     title: 'Push Promocional',
     description: 'Aprovação e histórico de notificações pagas pelas lojas.',
-    tone: 'from-[#153A4C] to-[#336886] text-white border-[#336886]',
+    tone: 'from-[#153A4C] to-[#2563EB] text-white border-[#2563EB]',
   },
   destinations: {
     title: 'Destinos',
     description: 'Cidades turísticas, chalés, pousadas e serviços locais.',
-    tone: 'from-[#153A4C] to-[#336886] text-white border-[#336886]',
+    tone: 'from-[#153A4C] to-[#2563EB] text-white border-[#2563EB]',
   },
 };
 
@@ -1493,7 +1493,7 @@ export function SuperAdmin() {
       <AuthLayout>
         <div className="space-y-4 login-page-enter">
           <div className="text-center space-y-2.5">
-            <div className="mx-auto grid h-[4.75rem] w-[4.75rem] place-items-center overflow-hidden rounded-full border-[4px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)] ring-1 ring-[#336886]/12">
+            <div className="mx-auto grid h-[4.75rem] w-[4.75rem] place-items-center overflow-hidden rounded-full border-[4px] border-white bg-white p-0.5 shadow-[0_16px_38px_-18px_rgba(13,79,102,0.5)] ring-1 ring-[#2563EB]/12">
               <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full rounded-full object-cover" />
             </div>
             <p className="text-[12px] font-bold uppercase tracking-[0.22em] text-slate-500">Acesso da plataforma</p>
@@ -1594,7 +1594,7 @@ export function SuperAdmin() {
             <button
               type="submit"
               disabled={loading || !loginForm.email || !loginForm.password}
-              className="w-full h-12 rounded-xl border-0 bg-[#1c4b62] text-white font-black shadow-[0_16px_28px_-18px_rgba(13,79,102,0.85)] hover:brightness-105 active:scale-[0.99] transition disabled:opacity-60"
+              className="w-full h-12 rounded-xl border-0 bg-[#1E40AF] text-white font-black shadow-[0_16px_28px_-18px_rgba(13,79,102,0.85)] hover:brightness-105 active:scale-[0.99] transition disabled:opacity-60"
             >
               {loading ? 'Entrando...' : 'Acessar administração'}
             </button>
@@ -1642,7 +1642,7 @@ export function SuperAdmin() {
           <button
             type="button"
             onClick={() => { navigate('/superadmin/home-config'); }}
-            className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/88 px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:border-[#336886]/25 hover:text-[#336886] sm:inline-flex"
+            className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/88 px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:border-[#2563EB]/25 hover:text-[#2563EB] sm:inline-flex"
           >
             <ImageSquare size={15} weight="duotone" />
             Configuração da Home
@@ -1650,7 +1650,7 @@ export function SuperAdmin() {
           <button
             type="button"
             onClick={() => { navigate('/superadmin/email-templates'); }}
-            className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/88 px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:border-[#336886]/25 hover:text-[#336886] xl:inline-flex"
+            className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/88 px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:border-[#2563EB]/25 hover:text-[#2563EB] xl:inline-flex"
           >
             <EnvelopeSimple size={15} weight="duotone" />
             E-mails
@@ -1658,7 +1658,7 @@ export function SuperAdmin() {
           <button
             type="button"
             onClick={() => { navigate('/superadmin/condominiums'); }}
-            className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/88 px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:border-[#336886]/25 hover:text-[#336886] sm:inline-flex"
+            className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/88 px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:border-[#2563EB]/25 hover:text-[#2563EB] sm:inline-flex"
           >
             <Buildings size={15} weight="duotone" />
             Condomínios
@@ -1666,7 +1666,7 @@ export function SuperAdmin() {
           <button
             type="button"
             onClick={() => { navigate('/superadmin/destinations'); }}
-            className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/88 px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:border-[#336886]/25 hover:text-[#336886] lg:inline-flex"
+            className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/88 px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-slate-700 shadow-sm transition hover:border-[#2563EB]/25 hover:text-[#2563EB] lg:inline-flex"
           >
             <Compass size={15} weight="duotone" />
             Destinos
@@ -1674,7 +1674,7 @@ export function SuperAdmin() {
           <button
             type="button"
             onClick={() => setProfileMenuOpen((prev) => !prev)}
-            className="flex items-center gap-2 rounded-full border border-white/80 bg-white/92 px-2 py-1.5 shadow-[0_12px_32px_-26px_rgba(15,23,42,0.45)] ring-1 ring-slate-100/80 transition hover:border-[#336886]/20 hover:bg-white"
+            className="flex items-center gap-2 rounded-full border border-white/80 bg-white/92 px-2 py-1.5 shadow-[0_12px_32px_-26px_rgba(15,23,42,0.45)] ring-1 ring-slate-100/80 transition hover:border-[#2563EB]/20 hover:bg-white"
             aria-haspopup="menu"
             aria-expanded={profileMenuOpen}
             title="Abrir menu de perfil"
@@ -1690,9 +1690,9 @@ export function SuperAdmin() {
           </button>
           {profileMenuOpen && (
             <div className="absolute right-0 top-[calc(100%+10px)] z-[70] w-[285px] overflow-hidden rounded-[1.65rem] border border-white/80 bg-white/94 p-2.5 shadow-[0_30px_76px_-44px_rgba(15,23,42,0.6)] ring-1 ring-slate-100/80 backdrop-blur-xl">
-              <div className="pointer-events-none absolute -right-14 -top-14 h-32 w-32 rounded-full bg-[#336886]/12 blur-3xl" />
-              <div className="relative mb-2 rounded-[1.25rem] border border-[#336886]/10 bg-[linear-gradient(135deg,rgba(51,104,134,0.08),rgba(255,255,255,0.88))] px-3 py-3">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]/70">Sessão master</p>
+              <div className="pointer-events-none absolute -right-14 -top-14 h-32 w-32 rounded-full bg-[#2563EB]/12 blur-3xl" />
+              <div className="relative mb-2 rounded-[1.25rem] border border-[#2563EB]/10 bg-[linear-gradient(135deg,rgba(51,104,134,0.08),rgba(255,255,255,0.88))] px-3 py-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2563EB]/70">Sessão master</p>
                 <p className="mt-1 truncate text-sm font-black text-slate-950">{superAdminUser || 'Admin Já no Caminho'}</p>
               </div>
               <div className="relative flex items-center justify-between gap-2 rounded-[1.15rem] border border-slate-100 bg-slate-50/78 px-3 py-2.5">
@@ -1805,14 +1805,14 @@ export function SuperAdmin() {
                   onClick={() => openSuperAdminGroup(id)}
                   className={`min-w-0 rounded-[1.25rem] border px-2.5 py-2.5 text-left transition-all active:scale-[0.985] ${
                     isActiveGroup
-                      ? 'border-[#336886]/18 bg-[#336886]/10 text-[#153A4C] shadow-[0_14px_30px_-24px_rgba(15,23,42,0.45)]'
+                      ? 'border-[#2563EB]/18 bg-[#2563EB]/10 text-[#153A4C] shadow-[0_14px_30px_-24px_rgba(15,23,42,0.45)]'
                       : 'border-slate-100 bg-slate-50/72 text-slate-500 hover:bg-white hover:text-slate-800'
                   }`}
                   aria-pressed={isActiveGroup}
                 >
                   <span className="flex min-w-0 items-center gap-2">
                     <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-2xl ${
-                      isActiveGroup ? 'bg-[#153A4C] text-white' : 'bg-white text-[#336886]'
+                      isActiveGroup ? 'bg-[#153A4C] text-white' : 'bg-white text-[#2563EB]'
                     }`}>
                       <Icon size={17} weight={isActiveGroup ? 'fill' : 'duotone'} />
                     </span>
@@ -1842,7 +1842,7 @@ export function SuperAdmin() {
                         : 'border-[#153A4C] bg-[#153A4C] text-white shadow-[0_12px_28px_-20px_rgba(15,23,42,0.65)]'
                       : isHealthSection
                         ? 'border-emerald-100 bg-emerald-50 text-emerald-700 hover:border-emerald-200 hover:bg-emerald-100/70'
-                        : 'border-slate-100 bg-white text-slate-500 hover:border-[#336886]/20 hover:text-[#153A4C]'
+                        : 'border-slate-100 bg-white text-slate-500 hover:border-[#2563EB]/20 hover:text-[#153A4C]'
                   }`}
                   aria-pressed={isActive}
                 >
@@ -2285,11 +2285,11 @@ export function SuperAdmin() {
           <>
           <div className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/80 p-4 shadow-[0_24px_60px_-44px_rgba(15,23,42,0.35)] backdrop-blur-xl">
             <div className="flex items-start gap-3">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[linear-gradient(135deg,#153A4C,#336886)] text-white shadow-[0_16px_34px_-24px_rgba(21,58,76,0.65)]">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[linear-gradient(135deg,#153A4C,#2563EB)] text-white shadow-[0_16px_34px_-24px_rgba(21,58,76,0.65)]">
                 <Megaphone size={22} weight="duotone" />
               </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#336886]">Comunicação</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#2563EB]">Comunicação</p>
                 <h2 className="mt-1 text-lg font-black tracking-tight text-slate-950">Push do app</h2>
                 <p className="mt-1 text-sm leading-5 text-slate-500">
                   Crie avisos globais, aprove promoções de lojas e acompanhe o histórico sem misturar os fluxos.
@@ -2310,13 +2310,13 @@ export function SuperAdmin() {
                     onClick={() => setPushPanel(item.id as any)}
                     className={`min-w-0 rounded-xl px-2.5 py-2.5 text-center text-xs font-black transition active:scale-[0.98] ${
                       selected
-                        ? 'bg-white text-[#153A4C] shadow-[0_12px_28px_-22px_rgba(15,23,42,0.45)] ring-1 ring-[#336886]/10'
+                        ? 'bg-white text-[#153A4C] shadow-[0_12px_28px_-22px_rgba(15,23,42,0.45)] ring-1 ring-[#2563EB]/10'
                         : 'text-slate-500 hover:bg-white/65'
                     }`}
                   >
                     <span className="block truncate">{item.label}</span>
                     {item.count !== null ? (
-                      <span className={`mt-0.5 block text-[10px] ${selected ? 'text-[#336886]' : 'text-slate-400'}`}>
+                      <span className={`mt-0.5 block text-[10px] ${selected ? 'text-[#2563EB]' : 'text-slate-400'}`}>
                         {item.count}
                       </span>
                     ) : null}
@@ -2496,7 +2496,7 @@ export function SuperAdmin() {
                     <p className="mt-1 line-clamp-2 text-xs leading-5 text-white/78">{broadcastForm.body || 'A mensagem aparece resumida no banner do celular.'}</p>
                   </div>
                   <div className="min-w-0 rounded-2xl bg-white p-3 text-slate-800">
-                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#336886]">Central de notificações</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#2563EB]">Central de notificações</p>
                     <p className="mt-1 break-words text-sm font-black text-slate-950">{broadcastForm.title || 'Título do push'}</p>
                     <p className="mt-1 whitespace-pre-wrap break-words text-xs leading-5 text-slate-600">{broadcastForm.body || 'Aqui a mensagem completa fica legível.'}</p>
                   </div>
@@ -2544,18 +2544,18 @@ export function SuperAdmin() {
             ) : (
               <div className="space-y-3">
                 {pendingPushes.map((push: any) => (
-                  <div key={push.id} className="group relative overflow-hidden rounded-[1.45rem] border border-[#336886]/15 bg-white shadow-[0_18px_48px_-34px_rgba(21,58,76,0.38)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_54px_-36px_rgba(21,58,76,0.48)]">
+                  <div key={push.id} className="group relative overflow-hidden rounded-[1.45rem] border border-[#2563EB]/15 bg-white shadow-[0_18px_48px_-34px_rgba(21,58,76,0.38)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_54px_-36px_rgba(21,58,76,0.48)]">
                     <span className="pointer-events-none absolute -right-12 -top-14 h-32 w-32 rounded-full bg-[#5FD35A]/10 blur-2xl" />
-                    <span className="pointer-events-none absolute -left-10 top-10 h-24 w-24 rounded-full bg-[#336886]/10 blur-2xl" />
-                    <div className="h-[3px] bg-gradient-to-r from-[#153A4C] to-[#336886]" />
+                    <span className="pointer-events-none absolute -left-10 top-10 h-24 w-24 rounded-full bg-[#2563EB]/10 blur-2xl" />
+                    <div className="h-[3px] bg-gradient-to-r from-[#153A4C] to-[#2563EB]" />
                     <div className="relative p-4">
                       <div className="flex items-start gap-3.5">
                         {/* Logo da loja */}
-                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[1.2rem] border border-white bg-white p-1 shadow-[0_14px_28px_-20px_rgba(15,23,42,0.55)] ring-1 ring-[#336886]/10">
+                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[1.2rem] border border-white bg-white p-1 shadow-[0_14px_28px_-20px_rgba(15,23,42,0.55)] ring-1 ring-[#2563EB]/10">
                           {getPromoPushStoreImageUrl(push) ? (
                             <img src={resolveAssetUrl(getPromoPushStoreImageUrl(push))} alt={push.storeName} className="h-full w-full rounded-[0.95rem] object-cover" />
                           ) : (
-                            <div className="grid h-full w-full place-items-center rounded-[0.95rem] bg-[linear-gradient(135deg,#153A4C,#336886)] text-sm font-black text-white">
+                            <div className="grid h-full w-full place-items-center rounded-[0.95rem] bg-[linear-gradient(135deg,#153A4C,#2563EB)] text-sm font-black text-white">
                               {String(push.storeName || 'L').slice(0, 2).toUpperCase()}
                             </div>
                           )}
@@ -2567,7 +2567,7 @@ export function SuperAdmin() {
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
                               <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-                                <p className="truncate text-[11px] font-black uppercase tracking-[0.14em] text-[#336886]">{push.storeName}</p>
+                                <p className="truncate text-[11px] font-black uppercase tracking-[0.14em] text-[#2563EB]">{push.storeName}</p>
                                 {push.storeSlug ? (
                                   <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-black text-slate-500">
                                     @{push.storeSlug}
@@ -2588,7 +2588,7 @@ export function SuperAdmin() {
                       <div className="mt-3">
                         {rejectingId === push.id ? (
                           <div className="space-y-2">
-                            <input type="text" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="Motivo da rejeição..." className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-[#336886]" />
+                            <input type="text" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="Motivo da rejeição..." className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-[#2563EB]" />
                             <div className="flex gap-2">
                               <button type="button" onClick={() => { setRejectingId(''); setRejectReason(''); }} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">Cancelar</button>
                               <button type="button" disabled={!rejectReason.trim() || pushActionId === push.id} onClick={async () => {
@@ -2616,7 +2616,7 @@ export function SuperAdmin() {
                                 showToast(`Push aprovado e enviado para ${result.sentCount ?? '?'} usuários!`, 'success');
                               } catch (err: any) { showToast(err?.message || 'Erro ao aprovar.', 'error'); }
                               finally { setPushActionId(''); }
-                            }} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[linear-gradient(135deg,#153A4C,#336886)] py-2.5 text-xs font-black text-white shadow-[0_6px_16px_-6px_rgba(21,58,76,0.5)] disabled:opacity-50 transition hover:brightness-110">
+                            }} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[linear-gradient(135deg,#153A4C,#2563EB)] py-2.5 text-xs font-black text-white shadow-[0_6px_16px_-6px_rgba(21,58,76,0.5)] disabled:opacity-50 transition hover:brightness-110">
                               <CheckCircle size={13} weight="fill" />
                               {pushActionId === push.id ? 'Enviando...' : 'Aprovar e Enviar'}
                             </button>
@@ -2658,7 +2658,7 @@ export function SuperAdmin() {
                         {getPromoPushStoreImageUrl(group) ? (
                           <img src={resolveAssetUrl(getPromoPushStoreImageUrl(group))} alt={group.storeName} className="h-full w-full object-cover" />
                         ) : (
-                          <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#336886)] text-[10px] font-black text-white">
+                          <div className="grid h-full w-full place-items-center bg-[linear-gradient(135deg,#153A4C,#2563EB)] text-[10px] font-black text-white">
                             {String(group.storeName).slice(0, 2).toUpperCase()}
                           </div>
                         )}
@@ -2684,7 +2684,7 @@ export function SuperAdmin() {
                                 )}
                                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
                                   {isSent && push.sentCount != null && (
-                                    <span className="text-[11px] font-black text-[#336886]">{push.sentCount} usuários</span>
+                                    <span className="text-[11px] font-black text-[#2563EB]">{push.sentCount} usuários</span>
                                   )}
                                   <span className="text-[10px] text-slate-400">{new Date(push.updatedAt).toLocaleString('pt-BR')}</span>
                                 </div>
@@ -3134,7 +3134,7 @@ export function SuperAdmin() {
                   <Cpu size={25} weight="duotone" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#336886]">Observabilidade</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2563EB]">Observabilidade</p>
                   <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">
                     {systemHealth?.status === 'healthy'
                       ? 'Sistema saudável'
@@ -3155,7 +3155,7 @@ export function SuperAdmin() {
                 type="button"
                 onClick={() => void loadSystemHealth()}
                 disabled={systemHealthLoading}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#336886]/12 bg-white px-4 py-3 text-sm font-black text-[#153A4C] shadow-[0_18px_42px_-32px_rgba(15,23,42,0.35)] transition active:scale-[0.98] disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#2563EB]/12 bg-white px-4 py-3 text-sm font-black text-[#153A4C] shadow-[0_18px_42px_-32px_rgba(15,23,42,0.35)] transition active:scale-[0.98] disabled:opacity-60"
               >
                 <ArrowClockwise size={16} weight="duotone" className={systemHealthLoading ? 'animate-spin' : ''} />
                 {systemHealthLoading ? 'Atualizando' : 'Atualizar status'}
@@ -3848,21 +3848,41 @@ export function SuperAdmin() {
                         <div className="mt-3 grid md:grid-cols-3 gap-2">
                           {docs.map((doc: any) => {
                             const type = String(doc?.docType || '').toUpperCase();
-                            const icon =
-                              type === 'CNH' ? <IdentificationCard size={16} weight="duotone" /> : type === 'SELFIE' ? <Camera size={16} weight="duotone" /> : <Car size={16} weight="duotone" />;
+                            const isDidit = type === 'KYC_DIDIT';
+                            const icon = isDidit
+                              ? <ShieldCheck size={16} weight="duotone" />
+                              : type === 'CNH' ? <IdentificationCard size={16} weight="duotone" /> : type === 'SELFIE' ? <Camera size={16} weight="duotone" /> : <Car size={16} weight="duotone" />;
                             return (
                               <div key={doc.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
                                 <div className="flex items-center justify-between gap-2">
                                   <div className="flex items-center gap-2 min-w-0">
                                     <span className="text-slate-700">{icon}</span>
-                                    <span className="text-xs font-extrabold text-slate-900 truncate">{type}</span>
+                                    <span className="text-xs font-extrabold text-slate-900 truncate">
+                                      {isDidit ? 'Verificação Didit' : type}
+                                    </span>
                                   </div>
                                   <span className="text-[10px] font-semibold text-slate-500">
                                     {formatDate(doc.uploadedAt)}
                                   </span>
                                 </div>
 
+                                {isDidit ? (
+                                  <div className="mt-2 text-[11px] text-slate-600 leading-relaxed">
+                                    <div>
+                                      Sessão:{' '}
+                                      <span className="font-semibold">
+                                        {String(doc?.metadata?.didit?.status || '—')}
+                                      </span>
+                                    </div>
+                                    <div className="text-slate-400">
+                                      Verificação hospedada (documento + selfie + liveness) — sem arquivo local.
+                                      Aprovar ativa o cadastro do entregador.
+                                    </div>
+                                  </div>
+                                ) : null}
+
                                 <div className="mt-3 flex flex-wrap gap-2">
+                                  {!isDidit ? (
                                   <a
                                     href={doc.fileKey}
                                     target="_blank"
@@ -3871,6 +3891,7 @@ export function SuperAdmin() {
                                   >
                                     Ver
                                   </a>
+                                  ) : null}
                                   <button
                                     type="button"
                                     onClick={() => reviewKycDocument(motoboy.id, doc.id, 'approve')}

@@ -54,6 +54,8 @@ import { useHubStores } from '../hooks/hub/useHubStores';
 import { ProfileDrawer } from '../components/Marketplace/ProfileDrawer';
 import { HubFilterSheet, type HubQuickFilterKey } from '../components/Marketplace/Hub/HubFilters';
 import { HubHeader, getTimeOfDay } from '../components/Marketplace/Hub/HubHeader';
+import { HubContextSheet, type DeliveryContext } from '../components/Marketplace/Hub/HubContextSheet';
+import { HubTourismConcierge } from '../components/Marketplace/Hub/HubTourismConcierge';
 import { HubAnonymousActiveOrders } from '../components/Marketplace/Hub/HubAnonymousActiveOrders';
 import { HubStoreCard } from '../components/Marketplace/Hub/HubStoreCard';
 import { HubFeaturedCarousel } from '../components/Marketplace/Hub/HubFeaturedCarousel';
@@ -798,6 +800,31 @@ export function MarketplacePage() {
         : '',
     [homeConfig.marketingPopup.actionLabel, homeConfig.marketingPopup.actionUrl, marketingPopupHasAction]
   );
+    const [contextSheetOpen, setContextSheetOpen] = useState(false);
+  const [activeDeliveryContext, setActiveDeliveryContext] = useState<DeliveryContext>({
+    type: 'home',
+    title: 'Casa · Rua das Acácias, 120',
+    subtitle: 'São José dos Campos - SP',
+    tag: 'Padrão',
+  });
+
+  const handleSelectDeliveryContext = (ctx: DeliveryContext) => {
+    setActiveDeliveryContext(ctx);
+    if (ctx.type === 'condo') {
+      if (condominiums.length > 0) {
+        handleCondominiumSelection(condominiums[0].slug || '', condominiums[0].name || '', condominiums[0].eventSummary);
+      } else {
+        openCondominiumPicker('all');
+      }
+    } else if (ctx.type === 'chale') {
+      clearCondominiumSelection();
+      setQuickFilter('all');
+    } else {
+      clearCondominiumSelection();
+      setQuickFilter('all');
+    }
+  };
+
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   // Boas-vindas mínimas, 1x por navegador (auditoria UX: zero onboarding pós-login)
   const [welcomeOpen, setWelcomeOpen] = useState(() => {
@@ -2108,6 +2135,14 @@ export function MarketplacePage() {
         onScrollStoresIntoView={scrollStoresIntoView}
       />
 
+      <HubContextSheet
+        isOpen={contextSheetOpen}
+        onOpenChange={setContextSheetOpen}
+        activeContext={activeDeliveryContext}
+        onSelectContext={handleSelectDeliveryContext}
+        onManageAddresses={() => navigate('/cliente/enderecos')}
+      />
+
       <div
         className={`relative transition-all duration-700 ${
           hasEntered ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
@@ -2143,11 +2178,18 @@ export function MarketplacePage() {
           onPedidosClick={handleOpenPedidos}
           onDestinosClick={() => navigate('/destinos')}
           isCondominiumScope={isCondominiumScope}
+          activeDeliveryContext={activeDeliveryContext}
+          onOpenContextSheet={() => setContextSheetOpen(true)}
           timeOfDay={getTimeOfDay()}
         />
 
         <main className={`mx-auto flex max-w-[1200px] flex-col gap-4 px-4 sm:gap-5 ${isNativePlatform ? 'pt-2' : 'pt-3'}`}>
           <h1 className="sr-only">Já no Caminho — lojas, feiras de condomínio e destinos</h1>
+          <HubTourismConcierge
+            activeContext={activeDeliveryContext}
+            onOpenContextSheet={() => setContextSheetOpen(true)}
+          />
+
           {isCustomerLogged && welcomeOpen ? (
             <section className="order-1 rounded-2xl border border-[#5FD35A]/30 bg-white px-4 py-3.5 shadow-[0_12px_28px_-22px_rgba(15,23,42,0.18)]">
               <div className="flex items-start justify-between gap-3">
@@ -2185,7 +2227,7 @@ export function MarketplacePage() {
           )}
 
           {debouncedQuery.length < 2 && !selectedCondominium && homeDestinationHighlights.length > 0 && (
-            <section className="order-7 space-y-3">
+            <section className="order-7 space-y-3 pt-4 border-t border-slate-100">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   {/* E3 (18/08): guarda-chuva "Seu bairro" unifica Guia+Feiras+Condomínio
@@ -2269,7 +2311,7 @@ export function MarketplacePage() {
           {debouncedQuery.length < 2 && condominiums.length > 0 && (
             <>
             <section
-              className={selectedCondominium ? 'order-2 sticky top-[max(env(safe-area-inset-top),0.65rem)] z-30 mb-4' : 'order-8'}
+              className={selectedCondominium ? 'order-0 sticky top-[max(env(safe-area-inset-top),0.65rem)] z-30 mb-4' : 'order-6'}
               style={{ transition: 'all .45s ease', transitionDelay: '95ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}
             >
               {selectedCondominium ? (
@@ -2478,12 +2520,12 @@ export function MarketplacePage() {
           )}
 
           {/* Seção Categorias Premium Squircle */}
-          <section className="order-4 relative" style={{ transition: 'all .45s ease', transitionDelay: '260ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+          <section className="order-1 relative" style={{ transition: 'all .45s ease', transitionDelay: '260ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
             <p className="mb-1.5 px-1 text-2xs font-black uppercase tracking-[0.24em] text-slate-500/90">Categorias</p>
-            <div className="-mx-4 grid grid-flow-col auto-cols-[minmax(54px,1fr)] snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="-mx-4 flex items-center gap-3 overflow-x-auto px-4 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <button
                 type="button"
-                className="group flex min-w-0 snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
+                className="group flex shrink-0 min-w-[60px] cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
                 onClick={() => setSegmentFilter('all')}
               >
                 <div className={`flex h-12 w-12 items-center justify-center rounded-[1.05rem] transition-all duration-200 ease-out ${
@@ -2499,7 +2541,7 @@ export function MarketplacePage() {
               {/* Tile Condomínio (contexto premium) — substitui o Empório na fileira */}
               <button
                 type="button"
-                className="group flex min-w-0 snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
+                className="group flex shrink-0 min-w-[72px] snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
                 onClick={() => {
                   if (myCondominium) {
                     setQuickFilter(quickFilter === 'my_condo' ? 'all' : 'my_condo');
@@ -2539,7 +2581,7 @@ export function MarketplacePage() {
                   <button
                     key={`${item.label}-${index}`}
                     type="button"
-                    className="group flex min-w-0 snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
+                    className="group flex shrink-0 min-w-[72px] snap-start cursor-pointer flex-col items-center gap-1.5 active:scale-[0.97] transition-transform duration-150 ease-out"
                     onClick={() => setSegmentFilter(prev => prev === item.label ? 'all' : item.label)}
                   >
                     <div className={`flex h-12 w-12 items-center justify-center rounded-[1.05rem] transition-all duration-200 ease-out ${
@@ -2581,7 +2623,7 @@ export function MarketplacePage() {
 
           {/* Peça de novo — lojas dos últimos pedidos (reorder em 2 toques, benchmark §29) */}
           {debouncedQuery.length < 2 && reorderStores.length > 0 && (
-            <section className="order-5 space-y-2.5" style={{ transition: 'all .45s ease', transitionDelay: '400ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+            <section className="order-2 space-y-2.5" style={{ transition: 'all .45s ease', transitionDelay: '400ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
               <div className="flex items-center justify-between gap-2 px-1">
                 <div className="min-w-0">
                   <p className="text-2xs font-black uppercase tracking-[0.22em] text-[#2563EB]">Peça de novo</p>
@@ -2623,7 +2665,7 @@ export function MarketplacePage() {
             />
           )}
 
-          <section ref={storesSectionRef} className="order-3 space-y-3.5" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
+          <section ref={storesSectionRef} className="order-4 space-y-3.5" style={{ transition: 'all .45s ease', transitionDelay: '100ms', opacity: hasEntered ? 1 : 0, transform: hasEntered ? 'translateY(0)' : 'translateY(8px)' }}>
             <div className="flex items-center justify-between gap-2">
               <div>
                 <h2 className="text-[1.05rem] font-black leading-tight tracking-[-0.035em] text-slate-950 sm:text-lg">

@@ -2,16 +2,97 @@
   "appName": "Já no Caminho",
   "version": "0.1.10",
   "versionBaseLabel": "v0.1.10",
-  "versionDisplaySuffix": "23995fc0",
-  "versionLabel": "v0.1.10.23995fc0",
-  "versionInternal": "0.1.10+20261031.104559.23995fc0",
-  "buildId": "0.1.10+20261031.104559.23995fc0-20261031.104559-23995fc0",
-  "builtAt": "2026-10-31T10:45:59.059Z",
-  "commitHash": "23995fc0482caf60f94b01afcd38159fc458b9b9",
-  "shortHash": "23995fc0",
-  "branch": "feat/dashboard-v2",
+  "versionDisplaySuffix": "464c0ccb",
+  "versionLabel": "v0.1.10.464c0ccb",
+  "versionInternal": "0.1.10+20261105.201635.464c0ccb",
+  "buildId": "0.1.10+20261105.201635.464c0ccb-20261105.201635-464c0ccb",
+  "builtAt": "2026-11-05T20:16:35.545Z",
+  "commitHash": "464c0ccbfa5ff1e325a0b1a50e14bede137e364d",
+  "shortHash": "464c0ccb",
+  "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "464c0ccbfa5ff1e325a0b1a50e14bede137e364d",
+      "shortHash": "464c0ccb",
+      "dateIso": "2026-11-02T18:49:04-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(mobile): versionCode 125 — AAB com peso/chips/sacola + login ReUI",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/464c0ccbfa5ff1e325a0b1a50e14bede137e364d"
+    },
+    {
+      "hash": "7377dbac21043f9dd5ba2f6f11f5db1c0352c70b",
+      "shortHash": "7377dbac",
+      "dateIso": "2026-11-02T18:19:37-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(peso): sacola flutuante da vitrine calcula por kg (bug do R$ 1.999)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/7377dbac21043f9dd5ba2f6f11f5db1c0352c70b"
+    },
+    {
+      "hash": "c42c6285fe804c538fb8d0fae1254fd965bd19dd",
+      "shortHash": "c42c6285",
+      "dateIso": "2026-11-02T16:36:34-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(peso): atalho + do card, badge da sacola e EDITAR de produto",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/c42c6285fe804c538fb8d0fae1254fd965bd19dd"
+    },
+    {
+      "hash": "470ca24def5bb2e64a479b53ff4e950c24d3fe78",
+      "shortHash": "470ca24d",
+      "dateIso": "2026-11-02T13:51:29-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(ux): venda por peso clara — porções rápidas, CTA com peso+valor e cadastro de comerciante",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/470ca24def5bb2e64a479b53ff4e950c24d3fe78"
+    },
+    {
+      "hash": "d4677c6a9893f077c64324793f663964d1c8706b",
+      "shortHash": "d4677c6a",
+      "dateIso": "2026-11-01T11:53:50-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(auth): SUPER_ADMIN atravessa requireRole de loja (AUTH-003 indevido)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d4677c6a9893f077c64324793f663964d1c8706b"
+    },
+    {
+      "hash": "6c7169e7a1e469a460a45cf11f49f0dec9c38348",
+      "shortHash": "6c7169e7",
+      "dateIso": "2026-11-01T11:48:57-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(admin-v2): fila mobile vertical + identidade visual do card",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/6c7169e7a1e469a460a45cf11f49f0dec9c38348"
+    },
+    {
+      "hash": "b5266a08f21559f2ca696bba8781c85dfe00b305",
+      "shortHash": "b5266a08",
+      "dateIso": "2026-10-31T08:16:10-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(graphify): reindexa grafo apos fatia 2 da queue (hook)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/b5266a08f21559f2ca696bba8781c85dfe00b305"
+    },
+    {
+      "hash": "bbd4a2f5b95c40d1959f8fc7fd000c91ed095dc9",
+      "shortHash": "bbd4a2f5",
+      "dateIso": "2026-10-31T08:15:11-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(admin-v2): etapa 1 fatia 2 — acoes rapidas, confirmacao de pagamento e fechamento do dia",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/bbd4a2f5b95c40d1959f8fc7fd000c91ed095dc9"
+    },
+    {
+      "hash": "63bf5826aad7f650b0d99848e26bcf0b97f067f2",
+      "shortHash": "63bf5826",
+      "dateIso": "2026-10-31T07:51:51-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(admin-v2): etapa 1 (queue) — paridade de transicoes por modalidade + fixes",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/63bf5826aad7f650b0d99848e26bcf0b97f067f2"
+    },
     {
       "hash": "23995fc0482caf60f94b01afcd38159fc458b9b9",
       "shortHash": "23995fc0",
@@ -200,87 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "chore(mobile): versionCode 124 — AAB com som de status no rastreio",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/0bce68e5044a579e3aa7f89beed202e7ef2d8bed"
-    },
-    {
-      "hash": "f688c0b0946a78d4f16515801f07436a11bd9aab",
-      "shortHash": "f688c0b0",
-      "dateIso": "2026-10-19T16:04:22-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(design): som sutil na transição de status do rastreio — benchmark iFood×99",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f688c0b0946a78d4f16515801f07436a11bd9aab"
-    },
-    {
-      "hash": "23d05d519844e871cead8a4a05a7f8e4ba558300",
-      "shortHash": "23d05d51",
-      "dateIso": "2026-10-19T15:36:30-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(design): upsell no modal, sacola vazia desenhada e tabular-nums — benchmark iFood×99",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/23d05d519844e871cead8a4a05a7f8e4ba558300"
-    },
-    {
-      "hash": "894e8bb9416ae5d113345ca50c2f97c51f52425a",
-      "shortHash": "894e8bb9",
-      "dateIso": "2026-10-19T12:23:02-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "docs(state): key Asaas staged com escape $$ — ativa no próximo deploy do backend",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/894e8bb9416ae5d113345ca50c2f97c51f52425a"
-    },
-    {
-      "hash": "5e70daa41239abb581aaee7844ce5c95285e07e6",
-      "shortHash": "5e70daa4",
-      "dateIso": "2026-10-19T09:18:08-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 123 — AAB com rollback do checkout multi-step",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/5e70daa41239abb581aaee7844ce5c95285e07e6"
-    },
-    {
-      "hash": "f42159672291b67f77cbde904c59f54bdea1346a",
-      "shortHash": "f4215967",
-      "dateIso": "2026-10-19T09:07:02-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "docs(state): rollback checkout + cadeia Asaas no PIX — pendência ASAAS_API_KEY em prod",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f42159672291b67f77cbde904c59f54bdea1346a"
-    },
-    {
-      "hash": "fd2fa06e6c683c2cbcda1fcdd9835b07366fbb33",
-      "shortHash": "fd2fa06e",
-      "dateIso": "2026-10-19T09:07:00-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(payments): checkout e balcão PIX honram a cadeia Asaas→OpenPix→MP",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/fd2fa06e6c683c2cbcda1fcdd9835b07366fbb33"
-    },
-    {
-      "hash": "ccddc226b15d2a6c43cbed20119694896920fdb9",
-      "shortHash": "ccddc226",
-      "dateIso": "2026-10-19T09:06:46-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "revert(design): checkout volta ao fluxo multi-step — rollback do \"checkout 1 página\"",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ccddc226b15d2a6c43cbed20119694896920fdb9"
-    },
-    {
-      "hash": "babda512926c341e9686d73fa7a27ab44c206c9f",
-      "shortHash": "babda512",
-      "dateIso": "2026-10-18T21:53:37-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "chore(mobile): versionCode 122 — AAB do redesign premium (ciclos 1+2)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/babda512926c341e9686d73fa7a27ab44c206c9f"
-    },
-    {
-      "hash": "670bc40970e3816cd429ca46ecbc3acbf2c44110",
-      "shortHash": "670bc409",
-      "dateIso": "2026-10-18T20:03:58-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(design): ciclo 2 do redesign premium — hub core-first, rastreio hero, checkout 1 página",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/670bc40970e3816cd429ca46ecbc3acbf2c44110"
     }
   ]
 }

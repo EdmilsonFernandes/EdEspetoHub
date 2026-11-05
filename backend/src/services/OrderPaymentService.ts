@@ -6,7 +6,7 @@ import { OrderPayment } from '../entities/OrderPayment';
 import { AppError } from '../errors/AppError';
 import { MercadoPagoService } from './MercadoPagoService';
 import { OpenPixService, toOpenPixCents } from './OpenPixService';
-import { AsaasService, resolvePlatformPixChain } from './AsaasService';
+import { AsaasService, isMercadoPagoEnabled, resolvePlatformPixChain } from './AsaasService';
 import { StorePaymentAccountService } from './StorePaymentAccountService';
 import { logger } from '../utils/logger';
 import { PaymentAuditService } from './PaymentAuditService';
@@ -65,6 +65,11 @@ export class OrderPaymentService {
 
     const pixChain = providerMethod === 'PIX' ? resolvePlatformPixChain(amount) : [];
     const usePlatformPix = pixChain.some((p) => p !== 'mp');
+    // Cartão online só existia via Mercado Pago (OAuth da loja) — com o MP
+    // desativado (contingência, 30/10) o método fica INDISPONÍVEL: o resumo
+    // público de pagamentos reflete e o checkout não oferece. Nunca criar
+    // cobrança de cartão por provedor que não a suporta.
+    if (providerMethod === 'CREDIT_CARD' && !isMercadoPagoEnabled()) return null;
     let accessToken: string | null | undefined = usePlatformPix
       ? undefined
       : await this.accountService.getActiveAccessToken(order.store.id);
@@ -182,7 +187,16 @@ export class OrderPaymentService {
           });
         }
       }
-      // Todos os provedores da plataforma falharam → fallback MP da loja.
+      // Todos os provedores da plataforma falharam → fallback MP da loja APENAS
+      // com o MP reativado administrativamente (30/10: contingência desativada).
+      if (!isMercadoPagoEnabled()) {
+        try {
+          await repo.delete(row.id);
+        } catch (deleteError: any) {
+          this.log.warn('Order payment row cleanup failed', { orderId: order.id, error: deleteError?.message });
+        }
+        return null;
+      }
       accessToken = await this.accountService.getActiveAccessToken(order.store.id).catch(() => undefined);
       if (!accessToken) {
         // Sem plataforma E sem MP conectado: remove a linha — pedido segue no fluxo
@@ -612,16 +626,33 @@ export class OrderPaymentService {
       throw new AppError('REFUND-014', 400, { message: 'ID do pagamento no provedor não encontrado.' });
     }
 
-    const accessToken = await this.accountService.getActiveAccessToken(storeId);
-    if (!accessToken) {
-      throw new AppError('REFUND-015', 400, { message: 'Conta Mercado Pago não conectada ou token indisponível.' });
-    }
-
     const refundAmount = amount && amount < Number(orderPayment.amount) ? amount : undefined;
-    const result = await this.mercadoPago.refundPayment(orderPayment.providerId, accessToken, refundAmount);
-
     const finalAmount = refundAmount || Number(orderPayment.amount);
     const refundStatus = refundAmount ? 'PARTIALLY_REFUNDED' : 'REFUNDED';
+    const provider = String(orderPayment.provider || '').toUpperCase();
+    let result: { id: string };
+
+    // Estorno pelo provedor que REALMENTE processou a cobrança (30/10): antes
+    // só existia o caminho Mercado Pago — pedido pago via Asaas/OpenPix não
+    // tinha estorno (REFUND-015 enganoso). Conciliação de cobrança MP antiga
+    // segue pelo MP mesmo com o provedor desativado (é leitura/estorno de
+    // passivo existente, não criação de cobrança nova).
+    if (provider === 'ASAAS') {
+      result = await this.asaas.refundPayment(orderPayment.providerId, refundAmount);
+    } else if (provider === 'OPENPIX') {
+      // OpenPix: refund por correlationID com valor explícito em CENTAVOS.
+      result = await this.openPix.refundCharge(
+        orderPayment.providerId,
+        Math.round(Number(finalAmount) * 100),
+        `Estorno pedido ${String(orderId).slice(0, 8)}`
+      );
+    } else {
+      const accessToken = await this.accountService.getActiveAccessToken(storeId);
+      if (!accessToken) {
+        throw new AppError('REFUND-015', 400, { message: 'Conta Mercado Pago não conectada ou token indisponível.' });
+      }
+      result = await this.mercadoPago.refundPayment(orderPayment.providerId, accessToken, refundAmount) as { id: string };
+    }
 
     await repo.update(orderPayment.id, {
       refundStatus,

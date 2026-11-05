@@ -15,6 +15,8 @@ import { Request, Response } from 'express';
 import { StoreService } from '../services/StoreService';
 import { SubscriptionService } from '../services/SubscriptionService';
 import { OrderReviewService } from '../services/OrderReviewService';
+import { isMercadoPagoEnabled } from '../services/AsaasService';
+import { isPlatformPixAvailable, resolvePublicPixProviderLabel } from '../services/PlatformPixService';
 import { AppDataSource } from '../config/database';
 import { Product } from '../entities/Product';
 import { isProductAvailableToday } from '../utils/productAvailability';
@@ -486,12 +488,19 @@ export class StoreController {
     }
 
     const validation = mpStatus?.validation || null;
-    const pixOnline = Boolean(validation?.pix?.available);
-    const creditOnline = Boolean(validation?.credit?.available);
-    const debitOnline = Boolean(validation?.debit?.available);
+    const mpEnabled = isMercadoPagoEnabled();
+    // PIX online: cadeia da PLATAFORMA (Asaas/OpenPix — independe da loja) OU
+    // MP da loja (só com o MP reativado). Antes era gate MP-only: loja sem MP
+    // conectado escondia o Pix mesmo com a plataforma capaz de cobrar.
+    const platformPix = isPlatformPixAvailable(100);
+    const mpPix = mpEnabled && Boolean(validation?.pix?.available);
+    const pixOnline = Boolean(platformPix || mpPix);
+    const creditOnline = mpEnabled && Boolean(validation?.credit?.available);
+    const debitOnline = mpEnabled && Boolean(validation?.debit?.available);
+    const providerLabel = platformPix ? resolvePublicPixProviderLabel() : (mpPix ? 'MERCADO_PAGO' : null);
 
     return {
-      provider: 'MERCADO_PAGO',
+      provider: providerLabel,
       onlineEnabled: Boolean(pixOnline || creditOnline || debitOnline),
       manualPixEnabled,
       cashEnabled: true,

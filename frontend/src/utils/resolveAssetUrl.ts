@@ -1,83 +1,97 @@
+import { Capacitor } from '@capacitor/core';
+
 const isAbsoluteUrl = (value: string) =>
   /^https?:\/\//i.test(value) || /^data:|^blob:/i.test(value);
 
 const publicUploadsBaseUrl = (import.meta.env.VITE_PUBLIC_UPLOADS_BASE_URL || '').trim().replace(/\/+$/, '');
-const publicUploadPrefixes = [
-  '/uploads/products/',
-  '/uploads/logos/',
-  '/uploads/condominiums/',
-  '/uploads/destinations/',
-  '/uploads/payment/',
-];
 
-const isPublicUploadPath = (value: string) => publicUploadPrefixes.some((prefix) => value.startsWith(prefix));
+export const isNativePlatform = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  if ((window as any).Capacitor?.isNativePlatform?.()) return true;
+  try {
+    if (Capacitor.isNativePlatform()) return true;
+  } catch {
+    // fallback
+  }
+  const origin = String(window.location.origin || '').toLowerCase();
+  const protocol = String(window.location.protocol || '').toLowerCase();
+  const hostname = String(window.location.hostname || '').toLowerCase();
+  if (protocol === 'capacitor:' || protocol === 'ionic:') return true;
+  if (origin.startsWith('capacitor://') || origin.startsWith('ionic://')) return true;
+  // No Capacitor Android com androidScheme: 'https', o app roda em https://localhost
+  // Quando não estiver rodando o servidor Vite local (import.meta.env.DEV), é 100% o app empacotado.
+  if (hostname === 'localhost' && !import.meta.env.DEV) return true;
+  return false;
+};
 
 /**
  * Resolve a URL de um asset (imagem, upload, etc) para garantir que funcione
  * tanto na Web quanto no APK (Android/iOS).
  */
-export const resolveAssetUrl = (value?: string) => {
-  if (!value) return value;
+export const resolveAssetUrl = (value?: string | null): string => {
+  if (!value) return '';
+
+  const trimmed = String(value).trim();
+  if (!trimmed) return '';
 
   // Se for base64 ou blob, retorna direto
-  if (/^data:|^blob:/i.test(value)) return value;
+  if (/^data:|^blob:/i.test(trimmed)) return trimmed;
 
-  // IMPORTANTE: Usamos sem 'www.' para garantir consistência com a configuração que você informou
+  // IMPORTANTE: Domínio de produção para imagens e uploads reais
   const productionDomain = 'https://janocaminho.com.br';
-  
-  // No APK o webview roda em capacitor:// ou ionic://, fora do origin do servidor,
-  // então URLs relativas precisam resolver contra o domínio de produção.
-  // IMPORTANTE: localhost NÃO é mobile — é o dev web local. Tratar localhost como
-  // mobile fazia /uploads/... (imagens salvas localmente) serem reescritas para o
-  // domínio de produção, onde o arquivo não existe → 404.
-  const isMobile = typeof window !== 'undefined' &&
-    (window.location.origin.startsWith('capacitor://') || window.location.origin.startsWith('ionic://'));
+  const isMobile = isNativePlatform();
 
   // 1. Se for uma URL absoluta
-  if (isAbsoluteUrl(value)) {
+  if (isAbsoluteUrl(trimmed)) {
     try {
-      const parsed = new URL(value);
-      if (publicUploadsBaseUrl && isPublicUploadPath(parsed.pathname)) {
+      const parsed = new URL(trimmed);
+      
+      // Se aponta para localhost ou 127.0.0.1 com /uploads
+      if ((parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') && parsed.pathname.startsWith('/uploads')) {
+        return `${productionDomain}${parsed.pathname}${parsed.search}`;
+      }
+
+      if (publicUploadsBaseUrl && parsed.pathname.startsWith('/uploads')) {
         return `${publicUploadsBaseUrl}${parsed.pathname}${parsed.search}`;
       }
+
+      // Se for domínio janocaminho, garante HTTPS
+      if (trimmed.includes('janocaminho.com.br')) {
+        let normalized = trimmed.replace(/^http:\/\//i, 'https://');
+        normalized = normalized.replace('www.janocaminho.com.br', 'janocaminho.com.br');
+        return normalized;
+      }
+
+      return trimmed;
     } catch {
-      // Fallback to the existing normalization logic below.
+      return trimmed;
     }
-
-    // Se for um dos nossos domínios, garante HTTPS, domínio novo e REMOVE 'www.'
-    if (value.includes('janocaminho.com.br') || value.includes('janocaminho.com.br')) {
-      let normalized = value.replace(/^http:\/\//i, 'https://');
-      normalized = normalized.replace('www.janocaminho.com.br', 'janocaminho.com.br');
-      normalized = normalized.replace('janocaminho.com.br', 'janocaminho.com.br');
-      return normalized;
-    }
-    return value;
   }
 
-  // 2. Se chegamos aqui, a URL é relativa (ex: /uploads/... ou /imagem.jpg)
-  const path = value.startsWith('/') ? value : `/${value}`;
+  // 2. URL relativa (ex: /uploads/... ou uploads/... ou /logo.svg)
+  const path = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
 
-  if (publicUploadsBaseUrl && isPublicUploadPath(path)) {
-    return `${publicUploadsBaseUrl}${path}`;
+  // Se for qualquer upload (/uploads/...), aponta SEMPRE para o domínio de produção
+  if (path.startsWith('/uploads/')) {
+    if (publicUploadsBaseUrl) {
+      return `${publicUploadsBaseUrl}${path}`;
+    }
+    return `${productionDomain}${path}`;
   }
-  
-  // Lista de arquivos que sabemos que são LOCAIS do App (estão na pasta public)
+
+  // Lista de arquivos locais que estão no pacote do app (/public)
   const isLocalAsset = path.startsWith('/icons/') || 
                        path.startsWith('/assets/') ||
                        path.startsWith('/marketing/') || 
                        path === '/favicon.svg' || 
                        path === '/logo.svg' || 
                        path === '/mercado-pago.svg' ||
-                       path === '/janocaminho.jpg' ||
-                       path === '/janocaminho.jpg' ||
                        path === '/janocaminho.jpg';
 
-  // Se estivermos no APK e NÃO for um asset local, forçamos a resolução contra o servidor
+  // No APK, qualquer outro recurso não-local deve vir de produção
   if (isMobile && !isLocalAsset) {
-    // Usamos o domínio fixo sem 'www' no APK para evitar problemas de Nginx
     return `${productionDomain}${path}`;
   }
 
-  // Na Web ou para assets locais no APK, mantém o comportamento padrão (relativo ao origin atual)
   return path;
 };

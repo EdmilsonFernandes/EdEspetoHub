@@ -986,7 +986,7 @@ function OrderCard({
     <>
     <article
       aria-label={`Pedido #${orderDisplayId} em ${storeName}`}
-      className={`jnc-hub-touch group relative overflow-hidden rounded-2xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${isActive ? 'border-l-4 border-l-emerald-500' : isCancelled ? 'border-l-4 border-l-rose-400' : 'border-l-4 border-l-transparent'}`}
+      className="jnc-hub-touch group relative overflow-hidden rounded-[1.35rem] border border-slate-200/90 bg-white shadow-xs hover:border-slate-300 transition-all"
     >
       {/* Header do card */}
       <div
@@ -1027,20 +1027,29 @@ function OrderCard({
               </span>
             ) : null}
           </div>
-          <div className="mt-1 flex min-w-0 items-center gap-1.5">
-            <span className={`inline-flex items-center gap-1 text-[12px] font-medium ${
-              isActive ? 'text-emerald-600' : isCancelled ? 'text-rose-500' : 'text-slate-500'
-            }`}>
-              {isActive ? (
+          <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2">
+            {isCancelled ? (
+              <span className="inline-flex items-center gap-1 rounded-full border border-rose-200/80 bg-rose-50 px-2.5 py-0.5 text-2xs font-black uppercase tracking-wider text-rose-700">
+                <XCircle size={12} weight="fill" />
+                Cancelado
+              </span>
+            ) : isActive ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/80 bg-emerald-50 px-2.5 py-0.5 text-2xs font-black uppercase tracking-wider text-emerald-800">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 duration-1000" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                 </span>
-              ) : statusMeta.icon}
-              <span className="truncate">{statusMeta.label}</span>
+                {statusMeta.label}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200/80 bg-emerald-50 px-2.5 py-0.5 text-2xs font-black uppercase tracking-wider text-emerald-800">
+                <CheckCircle size={12} weight="fill" />
+                {statusMeta.label || 'Entregue'}
+              </span>
+            )}
+            <span className="min-w-0 truncate text-[11px] font-semibold text-slate-400">
+              {orderMoment || orderDate || formatGroupDate(order.createdAt)}
             </span>
-            <span className="text-slate-300">•</span>
-            <span className="min-w-0 truncate text-[12px] text-slate-400">{orderMoment || orderDate || formatGroupDate(order.createdAt)}</span>
           </div>
           <div className="mt-1 flex min-w-0 items-center gap-1.5">
             <FulfillmentIcon size={12} weight="duotone" className={fulfillmentMeta.textClass || 'text-slate-400'} />
@@ -1253,13 +1262,9 @@ function OrderCard({
               <button
                 type="button"
                 onClick={handleRepeatOrder}
-                className={`ml-auto inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-[12px] font-bold transition-transform active:scale-[0.98] ${
-                  isCancelled
-                    ? 'border border-slate-200 bg-white text-[#153A4C]'
-                    : 'bg-[#153A4C] text-white'
-                }`}
+                className="ml-auto inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#5FD35A] px-4 py-2 text-xs font-black text-[#153A4C] shadow-xs hover:bg-[#53c44e] active:scale-[0.98] transition-all"
               >
-                <ArrowClockwise size={13} weight="bold" />
+                <ArrowClockwise size={14} weight="bold" />
                 Pedir novamente
               </button>
             )}
@@ -2033,7 +2038,7 @@ export function ClientOrders() {
                   onMouseEnter={() => lastOrderMerged?.id && primeOrderTrackingNavigation(lastOrderMerged.id)}
                   onFocus={() => lastOrderMerged?.id && primeOrderTrackingNavigation(lastOrderMerged.id)}
                   onTouchStart={() => lastOrderMerged?.id && primeOrderTrackingNavigation(lastOrderMerged.id)}
-                  className="shrink-0 rounded-xl bg-[#153A4C] px-3.5 py-2.5 text-[12px] font-bold text-white active:scale-[0.98] transition-transform"
+                  className="shrink-0 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 px-3.5 py-2.5 text-[12px] font-black text-[#153A4C] active:scale-[0.98] transition-all"
                 >
                   {lastOrderIsActive ? 'Acompanhar' : lastOrderIsCancelled ? 'Ver detalhes' : 'Pedir de novo'}
                 </button>

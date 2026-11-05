@@ -41,6 +41,7 @@ export function createProxyRoutes(): Router {
     // Payments / Webhooks
     r.post('/webhooks/payment-confirmed', forward); r.post('/webhooks/mercadopago', forward);
     r.post('/webhooks/openpix', forward); // WAVE 1 OpenPix: PIX de plataforma
+    r.post('/webhooks/asaas', forward); // Wave Asaas (03/10): PIX de plataforma
     r.get('/payment-accounts/mercadopago/callback', forward);
     r.get('/stores/:storeId/payments', authRequired, forward);
     // Cobrança no balcão (SDD cobranca-balcao)

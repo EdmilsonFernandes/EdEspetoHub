@@ -79,6 +79,7 @@ const defaultCorsOrigins = [
   'http://localhost:8080',
   'http://127.0.0.1:8080',
   'http://localhost',
+  'https://localhost',
   'http://127.0.0.1',
   'capacitor://localhost',
   'ionic://localhost',
@@ -150,6 +151,12 @@ export const env = {
     // PAYMENT_PROVIDER_DEFAULT=asaas (03/10): PIX via Asaas quando ≥R$5, com fallback
     // OpenPix → MP. Maquininha Point e cartão ficam SEMPRE no Mercado Pago.
     providerDefault: normalizeEnum(process.env.PAYMENT_PROVIDER_DEFAULT, ['mp', 'openpix', 'asaas'] as const, 'mp'),
+    // Mercado Pago = contingência DESATIVADA por padrão (30/10, decisão do dono):
+    // não pode ser acionado automaticamente em fluxo algum. Reativação é
+    // administrativa e explícita — PAYMENTS_MP_ENABLED=true no env do processo.
+    // Sem isso: cadeias PIX não caem no MP, cartão/boleto/Point ficam
+    // indisponíveis até um provedor os suportar, e a UI reflete a ausência.
+    mpEnabled: process.env.PAYMENTS_MP_ENABLED === 'true',
   },
   didit: {
     // KYC direto no provedor Didit (verification.didit.me, sem intermediários).

@@ -1,10 +1,24 @@
 import { memo, useRef, type RefObject } from 'react';
 import { Link } from 'react-router-dom';
-import { BellRinging, CaretDown, MagnifyingGlass, X, House, Receipt, MapTrifold, Tent, ClockCounterClockwise } from '@phosphor-icons/react';
+import {
+  BellRinging,
+  CaretDown,
+  MagnifyingGlass,
+  MapPinLine,
+  Mountains,
+  Buildings,
+  House,
+  X,
+  Receipt,
+  MapTrifold,
+  Tent,
+  ClockCounterClockwise,
+} from '@phosphor-icons/react';
 import { HeaderAvatarTrigger } from '../HeaderAvatarTrigger';
 import { inputAssistProps } from '../../../utils/inputAssist';
 import { HubFilterBar, type HubQuickFilterKey } from './HubFilters';
 import { useRecentSearches } from '../../../hooks/hub/useRecentSearches';
+import type { DeliveryContext } from './HubContextSheet';
 
 export type TimeOfDay = 'morning' | 'afternoon' | 'evening';
 
@@ -30,8 +44,10 @@ type HubHeaderProps = {
   searchPlaceholderVisible: boolean;
   quickFilter: HubQuickFilterKey;
   segmentFilter: string;
+  activeDeliveryContext?: DeliveryContext;
   onOpenProfileDrawer: () => void;
   onToggleNearbyFilter: () => void;
+  onOpenContextSheet?: () => void;
   onHubNotificationClick: () => void;
   onQueryChange: (value: string) => void;
   onDebouncedQueryChange: (value: string) => void;
@@ -52,7 +68,7 @@ export const HubHeader = memo(function HubHeader({
   customerDisplayName,
   customerProfileImage,
   isCustomerLogged,
-  hubHeaderEyebrow,
+  hubHeaderEyebrow: _hubHeaderEyebrow,
   displayLocationLabel,
   hubNotificationCount,
   searchInputRef,
@@ -62,8 +78,10 @@ export const HubHeader = memo(function HubHeader({
   searchPlaceholderVisible,
   quickFilter,
   segmentFilter,
+  activeDeliveryContext,
   onOpenProfileDrawer,
   onToggleNearbyFilter,
+  onOpenContextSheet,
   onHubNotificationClick,
   onQueryChange,
   onDebouncedQueryChange,
@@ -99,108 +117,124 @@ export const HubHeader = memo(function HubHeader({
     }
   };
 
+  const contextType = activeDeliveryContext?.type || 'home';
+  const contextTitle = activeDeliveryContext?.title || displayLocationLabel;
+  const isChale = contextType === 'chale';
+  const isCondo = contextType === 'condo';
+
   return (
     <header
-      className={`sticky top-0 z-[60] border-b border-white/65 transition-all duration-300 jnc-marketplace-header-glass ${
-        isNativePlatform
-          ? 'jnc-marketplace-header-glass--native'
-          : isHeaderElevated
-            ? ''
-            : 'jnc-marketplace-header-glass--floating'
+      className={`sticky top-0 z-[60] border-b border-slate-100 bg-white/96 backdrop-blur-xl transition-all duration-300 ${
+        isHeaderElevated ? 'shadow-[0_10px_30px_-15px_rgba(15,23,42,0.08)]' : ''
       }`}
     >
       <div
         className={`mx-auto max-w-[1200px] px-4 ${
           isNativePlatform
-            ? 'pb-1.5 pt-[max(0.35rem,calc(env(safe-area-inset-top)+0.05rem))]'
-            : 'pb-2 pt-[max(0.55rem,calc(env(safe-area-inset-top)+0.1rem))]'
+            ? 'pb-2.5 pt-[max(0.4rem,calc(env(safe-area-inset-top)+0.05rem))]'
+            : 'pb-3 pt-[max(0.55rem,calc(env(safe-area-inset-top)+0.1rem))]'
         }`}
       >
-        <div
-          className={`${
-            isNativePlatform ? 'space-y-2 rounded-[1.45rem] px-2.5 py-2' : 'space-y-2 rounded-[1.65rem] px-3 py-2.5'
-          } relative overflow-hidden border border-white/55 bg-white/36 shadow-[0_18px_42px_-36px_rgba(21,58,76,0.34)]`}
-        >
-          <div className="pointer-events-none absolute -left-12 -top-16 h-36 w-36 rounded-full bg-[#5FD35A]/[0.05] blur-3xl" />
-          <div className="pointer-events-none absolute -right-10 top-6 h-28 w-28 rounded-full bg-[#2563EB]/10 blur-3xl" />
-
+        <div className="relative space-y-2.5">
           {/* MOBILE LAYOUT (hidden on desktop) */}
-          <div className="lg:hidden space-y-2.5 md:space-y-3">
-            <div className="relative flex items-center justify-between gap-2">
-              <div className="flex min-w-0 flex-1 items-center gap-2.5">
+          <div className="lg:hidden space-y-2.5">
+            {/* Top row: Context Chip + (Bell & Avatar) */}
+            <div className="relative flex items-center justify-between gap-2.5">
+              {/* Context Chip ReUI: abre a Sheet de Entrega ao tocar */}
+              <button
+                type="button"
+                onClick={onOpenContextSheet || onToggleNearbyFilter}
+                className={`jnc-hub-touch flex min-w-0 flex-1 items-center gap-2 rounded-full border px-3 py-1.5 shadow-2xs transition-all active:scale-[0.98] ${
+                  isChale
+                    ? 'border-emerald-200 bg-emerald-50/70 hover:bg-emerald-100/70'
+                    : isCondo
+                      ? 'border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100/70'
+                      : 'border-slate-200/80 bg-slate-50/90 hover:bg-slate-100/80'
+                }`}
+              >
+                <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
+                  isChale
+                    ? 'bg-emerald-600 text-white'
+                    : isCondo
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-[#5FD35A] text-[#153A4C]'
+                }`}>
+                  {isChale ? (
+                    <Mountains size={13} weight="fill" />
+                  ) : isCondo ? (
+                    <Buildings size={13} weight="fill" />
+                  ) : (
+                    <MapPinLine size={13} weight="fill" />
+                  )}
+                </span>
+                <span className="min-w-0 flex-1 text-left leading-tight">
+                  <span className={`block text-[9.5px] font-black uppercase tracking-[0.14em] ${
+                    isChale ? 'text-emerald-700' : isCondo ? 'text-indigo-700' : 'text-slate-400'
+                  }`}>
+                    {isChale ? 'Chalé / Serra' : isCondo ? 'Condomínio' : 'Entregar em'}
+                  </span>
+                  <span className="block truncate text-xs font-black text-slate-900">
+                    {contextTitle}
+                  </span>
+                </span>
+                <CaretDown size={12} weight="bold" className="shrink-0 text-slate-400" />
+              </button>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={onHubNotificationClick}
+                  className="jnc-hub-touch relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200/70 bg-slate-50 text-slate-700 shadow-2xs transition hover:bg-slate-100 active:scale-95"
+                  aria-label={hubNotificationCount > 0 ? `${hubNotificationCount} notificação de pedido` : 'Notificações'}
+                  title={hubNotificationCount > 0 ? 'Pedidos em andamento' : 'Notificações'}
+                >
+                  <BellRinging size={17} weight={hubNotificationCount > 0 ? 'fill' : 'bold'} />
+                  {hubNotificationCount > 0 ? (
+                    <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#5FD35A] text-[10px] font-black text-[#153A4C] ring-2 ring-white">
+                      {hubNotificationCount > 9 ? '9+' : hubNotificationCount}
+                    </span>
+                  ) : null}
+                </button>
+
                 <HeaderAvatarTrigger
                   displayName={customerDisplayName}
                   profileImageUrl={customerProfileImage}
                   hasNotification={!isCustomerLogged}
                   onClick={onOpenProfileDrawer}
                 />
-                <div className="min-w-0 flex-1 rounded-2xl px-2.5 py-1.5 min-[390px]:px-3 min-[390px]:py-2">
-                  <div className="mb-0.5 flex items-center gap-1.5">
-                    <img
-                      src="/janocaminho.jpg"
-                      alt="Já no Caminho"
-                      className="h-4 w-4 shrink-0 rounded-[0.4rem] object-cover shadow-[0_2px_6px_-2px_rgba(21,58,76,0.3)]"
-                    />
-                    <p className="truncate text-2xs font-black uppercase tracking-[0.16em] text-[#2563EB]/70 min-[390px]:text-[11px] min-[390px]:tracking-[0.2em]">
-                      {hubHeaderEyebrow}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    className="jnc-hub-touch inline-flex min-h-10 w-full min-w-0 items-center justify-between gap-2 text-left text-[13.5px] font-black leading-tight text-[#153A4C] hover:text-[#2563EB] min-[390px]:text-[14px]"
-                    onClick={onToggleNearbyFilter}
-                  >
-                    <span className="flex min-w-0 items-center gap-1.5 truncate">
-                      {quickFilter === 'nearby' && (
-                        <span className="relative flex h-2 w-2 shrink-0">
-                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]" />
-                        </span>
-                      )}
-                      <span className="truncate">{displayLocationLabel}</span>
-                    </span>
-                    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/70 text-[#2563EB] shadow-[0_10px_20px_-18px_rgba(21,58,76,0.45)]">
-                      <CaretDown size={13} weight="bold" />
-                    </span>
-                  </button>
-                </div>
               </div>
-
-              <button
-                type="button"
-                onClick={onHubNotificationClick}
-                className="jnc-hub-touch jnc-hub-pill relative flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] text-[#2563EB] hover:bg-white/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5FD35A]"
-                aria-label={hubNotificationCount > 0 ? `${hubNotificationCount} notificação de pedido` : 'Abrir notificações'}
-                title={hubNotificationCount > 0 ? 'Pedidos em andamento' : 'Notificações'}
-              >
-                <BellRinging size={18} weight={hubNotificationCount > 0 ? 'fill' : 'duotone'} />
-                {hubNotificationCount > 0 ? (
-                  <span className="absolute -right-0.5 -top-0.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-2xs font-black leading-none text-white ring-2 ring-white shadow-[0_8px_18px_-10px_rgba(225,29,72,0.9)]">
-                    {hubNotificationCount > 9 ? '9+' : hubNotificationCount}
-                  </span>
-                ) : null}
-                {hubNotificationCount > 0 ? (
-                  <span className="absolute inset-0 rounded-[1.15rem] border border-rose-600/35 animate-ping" />
-                ) : null}
-              </button>
             </div>
 
+            {/* Greeting */}
+            <div className="pt-0.5">
+              <p className="text-[17px] font-black tracking-tight text-slate-950">
+                {isChale ? (
+                  'Jantar no chalé? Peça agora'
+                ) : isCondo ? (
+                  'Feiras e lojas no seu condomínio'
+                ) : isCustomerLogged && customerDisplayName ? (
+                  `Com fome, ${customerDisplayName.split(' ')[0]}?`
+                ) : (
+                  'Com fome? Peça agora'
+                )}
+              </p>
+              {isChale && (
+                <p className="text-2xs font-bold text-emerald-700">
+                  São Francisco Xavier · Lojas que entregam na sua hospedagem
+                </p>
+              )}
+            </div>
+
+            {/* Search Input ReUI: Clean, Soft Gray Surface */}
             <div className="relative z-20">
               <div
-                className={`group relative isolate flex items-center gap-3 overflow-hidden border border-white/68 bg-white/58 px-3.5 shadow-[0_16px_34px_-30px_rgba(21,58,76,0.38)] transition-[border-color,box-shadow,transform] duration-300 ease-out hover:border-white/80 focus-within:-translate-y-0.5 focus-within:border-[#5FD35A]/25 focus-within:shadow-[0_22px_54px_-34px_rgba(95,211,90,0.28)] focus-within:ring-2 focus-within:ring-[#5FD35A]/15 ${
-                  isNativePlatform
-                    ? 'min-h-[50px] rounded-2xl'
-                    : 'min-h-[54px] rounded-3xl'
-                }`}
+                className="group relative flex min-h-[44px] items-center gap-2.5 rounded-2xl border border-slate-200/80 bg-slate-100/70 px-3.5 shadow-2xs transition-all focus-within:border-[#2563EB] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#2563EB]/15"
                 onClick={(event) => {
                   if ((event.target as HTMLElement).closest('button')) return;
                   searchInputRef.current?.focus();
                 }}
               >
-                <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
-                <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[1rem] border border-white/70 bg-white/70 text-[#2563EB] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
-                  <MagnifyingGlass size={18} weight="bold" />
-                </div>
+                <MagnifyingGlass size={17} weight="bold" className="shrink-0 text-[#2563EB]" />
                 <div className="relative min-w-0 flex-1 flex items-center">
                   <input
                     {...inputAssistProps.search}
@@ -214,31 +248,24 @@ export const HubHeader = memo(function HubHeader({
                     onChange={(event) => onQueryChange(event.target.value)}
                     onFocus={() => onSearchEditingChange(true)}
                     onBlur={handleSearchBlur}
-                    placeholder={isSearchEditing ? 'Buscar loja, categoria ou produto' : ''}
+                    placeholder={isSearchEditing ? (isChale ? 'Buscar loja ou prato na serra' : 'Buscar loja, categoria ou produto') : ''}
                     enterKeyHint="search"
-                    className={`block w-full min-w-0 appearance-none bg-transparent pr-1 font-semibold text-[#153A4C] outline-none transition-opacity duration-300 placeholder:text-[#2563EB]/45 ${
-                      isNativePlatform ? 'min-h-[48px] text-[15px]' : 'min-h-[52px] text-[14px]'
-                    }`}
+                    className="block min-h-[42px] w-full min-w-0 appearance-none bg-transparent font-semibold text-slate-900 outline-none text-[13.5px] placeholder:text-slate-400"
                     style={{
                       WebkitAppearance: 'none',
-                      caretColor: '#5FD35A',
+                      caretColor: '#2563EB',
                       backgroundColor: 'transparent',
-                      boxShadow: 'none',
-                      WebkitTextFillColor: 'inherit',
-                      color: '#153A4C',
-                      transform: 'translateZ(0)',
+                      color: '#0F172A',
                     }}
                   />
                   {!isSearchEditing && !query && (
                     <div
                       className={`pointer-events-none absolute left-0 flex items-center transition-all duration-300 ${
                         searchPlaceholderVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
-                      } ${
-                        isNativePlatform ? 'text-[15px]' : 'text-[14px]'
-                      }`}
+                      } text-[13.5px]`}
                     >
-                      <span className="font-semibold text-[#2563EB]/58 truncate">
-                        {searchPlaceholder}
+                      <span className="font-semibold text-slate-400 truncate">
+                        {isChale ? 'Buscar loja ou prato na serra...' : (searchPlaceholder || 'Buscar loja, prato ou produto')}
                       </span>
                     </div>
                   )}
@@ -251,11 +278,10 @@ export const HubHeader = memo(function HubHeader({
                       onDebouncedQueryChange('');
                       onSearchEditingChange(false);
                     }}
-                    className="jnc-hub-touch inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/70 text-[#2563EB]/70 hover:bg-white hover:text-[#153A4C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5FD35A]"
+                    className="jnc-hub-touch inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-600 hover:bg-slate-300"
                     aria-label="Limpar busca"
-                    title="Limpar"
                   >
-                    <X size={14} weight="bold" />
+                    <X size={13} weight="bold" />
                   </button>
                 ) : null}
               </div>
@@ -263,42 +289,33 @@ export const HubHeader = memo(function HubHeader({
           </div>
 
           {/* DESKTOP LAYOUT (hidden on mobile) */}
-          <div className="hidden lg:flex items-center justify-between gap-6 relative py-1.5">
+          <div className="hidden lg:flex items-center justify-between gap-6 relative py-1">
             {/* Left side: Logo + Location Picker */}
             <div className="flex items-center gap-4">
               <Link to="/hub" onClick={onHomeClick} className="jnc-hub-touch flex min-h-10 shrink-0 select-none items-center gap-2.5 rounded-xl group">
                 <img
                   src="/janocaminho.jpg"
                   alt="Já no Caminho"
-                  className="h-9 w-9 rounded-xl object-cover shadow-[0_4px_12px_rgba(15,23,42,0.15)] ring-1 ring-white/20 group-hover:scale-105 transition-transform duration-300"
+                  className="h-9 w-9 rounded-xl object-cover shadow-xs ring-1 ring-slate-200 group-hover:scale-105 transition-transform duration-300"
                 />
-                <span className="text-[15px] font-black tracking-tight text-[#153A4C]">
+                <span className="text-[15px] font-black tracking-tight text-slate-950">
                   Já no Caminho
                 </span>
               </Link>
               
-              <div className="h-5 w-px bg-[#2563EB]/14" />
+              <div className="h-5 w-px bg-slate-200" />
               
               {/* Location Badge */}
               <button
                 type="button"
-                onClick={onToggleNearbyFilter}
-                className="jnc-hub-touch jnc-hub-pill inline-flex min-h-10 items-center gap-2 rounded-full px-3.5 py-2 text-xs font-bold hover:bg-white/90 hover:border-[#2563EB]/18"
+                onClick={onOpenContextSheet || onToggleNearbyFilter}
+                className="jnc-hub-touch inline-flex min-h-10 items-center gap-2 rounded-full border border-slate-200/80 bg-slate-50 px-3.5 py-2 text-xs font-bold text-slate-800 hover:bg-slate-100"
               >
-                {quickFilter === 'nearby' ? (
-                  <span className="relative flex h-2 w-2 shrink-0">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]" />
-                  </span>
-                ) : (
-                  <span className="relative flex h-2 w-2 shrink-0">
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-[#2563EB]/35" />
-                  </span>
-                )}
-                <span className="truncate max-w-[160px]" title={displayLocationLabel}>
-                  {displayLocationLabel}
+                <MapPinLine size={13} weight="fill" className="text-[#5FD35A]" />
+                <span className="truncate max-w-[160px]" title={contextTitle}>
+                  {contextTitle}
                 </span>
-                <CaretDown size={11} weight="bold" className="text-[#2563EB]/70" />
+                <CaretDown size={11} weight="bold" className="text-slate-400" />
               </button>
             </div>
 
@@ -307,10 +324,10 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onHomeClick}
-                className={`jnc-hub-touch flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 hover:bg-white/70 ${
+                className={`jnc-hub-touch flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 ${
                   !isCondominiumScope
-                    ? 'bg-white/82 text-[#153A4C] font-black shadow-[0_12px_24px_-20px_rgba(21,58,76,0.28)]'
-                    : 'text-[#2563EB]/62 hover:text-[#153A4C]'
+                    ? 'bg-slate-100 text-slate-950 font-black shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-950 hover:bg-slate-50'
                 }`}
               >
                 <House size={14} weight={!isCondominiumScope ? 'fill' : 'bold'} />
@@ -319,10 +336,10 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onAgendaClick}
-                className={`jnc-hub-touch flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 hover:bg-white/70 ${
+                className={`jnc-hub-touch flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 ${
                   isCondominiumScope
-                    ? 'bg-white/82 text-[#153A4C] font-black shadow-[0_12px_24px_-20px_rgba(21,58,76,0.28)]'
-                    : 'text-[#2563EB]/62 hover:text-[#153A4C]'
+                    ? 'bg-slate-100 text-slate-950 font-black shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-950 hover:bg-slate-50'
                 }`}
               >
                 <Tent size={14} weight={isCondominiumScope ? 'fill' : 'bold'} />
@@ -331,7 +348,7 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onPedidosClick}
-                className="jnc-hub-touch flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-[#2563EB]/62 hover:bg-white/70 hover:text-[#153A4C]"
+                className="jnc-hub-touch flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-slate-950"
               >
                 <Receipt size={14} weight="bold" />
                 Pedidos
@@ -339,7 +356,7 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onDestinosClick}
-                className="jnc-hub-touch flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-[#2563EB]/62 hover:bg-white/70 hover:text-[#153A4C]"
+                className="jnc-hub-touch flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-slate-950"
               >
                 <MapTrifold size={14} weight="bold" />
                 Visite
@@ -347,14 +364,13 @@ export const HubHeader = memo(function HubHeader({
             </nav>
 
             {/* Right side: Search Bar + Notifications + Profile */}
-            <div className="flex items-center gap-3.5 flex-1 max-w-[440px] justify-end">
+            <div className="flex items-center gap-3 flex-1 max-w-[420px] justify-end">
               {/* Desktop Search Bar */}
               <div
-                className="jnc-hub-card relative flex min-h-10 max-w-[280px] flex-1 items-center gap-2.5 overflow-hidden rounded-[1.25rem] px-3 py-2 transition-all duration-300 hover:bg-white focus-within:-translate-y-0.5 focus-within:border-[#5FD35A]/25 focus-within:bg-white focus-within:shadow-[0_18px_42px_-30px_rgba(95,211,90,0.24)] focus-within:ring-2 focus-within:ring-[#5FD35A]/15"
+                className="relative flex min-h-10 max-w-[260px] flex-1 items-center gap-2 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 shadow-2xs transition-all duration-300 focus-within:border-[#2563EB] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#2563EB]/15"
                 onClick={() => desktopSearchInputRef.current?.focus()}
               >
-                <span className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
-                <MagnifyingGlass size={15} weight="bold" className="text-[#2563EB]/70 shrink-0" />
+                <MagnifyingGlass size={15} weight="bold" className="text-slate-400 shrink-0" />
                 <div className="relative min-w-0 flex-1 flex items-center h-full">
                   <input
                     {...inputAssistProps.search}
@@ -368,7 +384,7 @@ export const HubHeader = memo(function HubHeader({
                     onBlur={handleSearchBlur}
                     placeholder={isSearchEditing ? 'Buscar no app' : ''}
                     enterKeyHint="search"
-                    className="block min-h-10 w-full min-w-0 appearance-none bg-transparent font-bold text-[#153A4C] outline-none text-xs placeholder:text-[#2563EB]/45 placeholder:font-semibold"
+                    className="block min-h-10 w-full min-w-0 appearance-none bg-transparent font-bold text-slate-900 outline-none text-xs placeholder:text-slate-400"
                   />
                   {!isSearchEditing && !query && (
                     <div
@@ -376,7 +392,7 @@ export const HubHeader = memo(function HubHeader({
                         searchPlaceholderVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
                       }`}
                     >
-                      <span className="font-bold text-[#2563EB]/48 text-xs truncate">
+                      <span className="font-bold text-slate-400 text-xs truncate">
                         {searchPlaceholder}
                       </span>
                     </div>
@@ -390,7 +406,7 @@ export const HubHeader = memo(function HubHeader({
                       onDebouncedQueryChange('');
                       onSearchEditingChange(false);
                     }}
-                    className="jnc-hub-touch inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#E0EBFD] text-[#2563EB]/70 hover:bg-white hover:text-[#153A4C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5FD35A]"
+                    className="jnc-hub-touch inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-600 hover:bg-slate-300"
                     aria-label="Limpar busca"
                   >
                     <X size={10} weight="bold" />
@@ -402,13 +418,13 @@ export const HubHeader = memo(function HubHeader({
               <button
                 type="button"
                 onClick={onHubNotificationClick}
-                className="jnc-hub-touch jnc-hub-pill relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.95rem] p-1.5 hover:bg-white/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5FD35A]"
-                aria-label={hubNotificationCount > 0 ? `${hubNotificationCount} notificação de pedido` : 'Abrir notificações'}
+                className="jnc-hub-touch relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                aria-label={hubNotificationCount > 0 ? `${hubNotificationCount} notificação de pedido` : 'Notificações'}
                 title={hubNotificationCount > 0 ? 'Pedidos em andamento' : 'Notificações'}
               >
-                <BellRinging size={15} weight={hubNotificationCount > 0 ? 'fill' : 'bold'} />
+                <BellRinging size={16} weight={hubNotificationCount > 0 ? 'fill' : 'bold'} />
                 {hubNotificationCount > 0 ? (
-                  <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-rose-600 text-2xs font-black text-white ring-1.5 ring-white">
+                  <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#5FD35A] text-[10px] font-black text-[#153A4C] ring-1.5 ring-white">
                     {hubNotificationCount > 9 ? '9+' : hubNotificationCount}
                   </span>
                 ) : null}
@@ -424,21 +440,25 @@ export const HubHeader = memo(function HubHeader({
             </div>
           </div>
 
-          <HubFilterBar
-            isNativePlatform={isNativePlatform}
-            quickFilter={quickFilter}
-            segmentFilter={segmentFilter}
-            onQuickFilterChange={onQuickFilterChange}
-            onOpenFilters={onOpenFilters}
-            onScrollStoresIntoView={onScrollStoresIntoView}
-          />
+          {/* Quick Filter Bar */}
+          <div className="pt-0.5">
+            <HubFilterBar
+              isNativePlatform={isNativePlatform}
+              quickFilter={quickFilter}
+              segmentFilter={segmentFilter}
+              variant="default"
+              onQuickFilterChange={onQuickFilterChange}
+              onOpenFilters={onOpenFilters}
+              onScrollStoresIntoView={onScrollStoresIntoView}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Buscas recentes — aparece ao focar a busca vazia (benchmark §5) */}
+      {/* Buscas recentes */}
       {isSearchEditing && !query && recentSearches.length > 0 && (
         <div className="absolute inset-x-0 top-full z-[61] px-4 pt-2">
-          <div className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-2 rounded-2xl border border-white/70 bg-white/95 p-3 shadow-[0_26px_58px_-34px_rgba(21,58,76,0.4)] backdrop-blur-xl animate-in fade-in slide-in-from-top-1 duration-150">
+          <div className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-2 rounded-2xl border border-slate-200/80 bg-white/95 p-3 shadow-lg backdrop-blur-xl animate-in fade-in slide-in-from-top-1 duration-150">
             <span className="inline-flex items-center gap-1.5 text-2xs font-black uppercase tracking-[0.16em] text-slate-400">
               <ClockCounterClockwise size={13} weight="duotone" />
               Recentes
@@ -449,7 +469,7 @@ export const HubHeader = memo(function HubHeader({
                 type="button"
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => applyRecentSearch(term)}
-                className="jnc-hub-touch jnc-hub-pill max-w-[46vw] truncate rounded-full border border-slate-200/70 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:border-[#2563EB]/30 hover:bg-white hover:text-[#153A4C] active:scale-95"
+                className="jnc-hub-touch max-w-[46vw] truncate rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:border-[#2563EB]/30 hover:bg-white hover:text-slate-900 active:scale-95"
               >
                 {term}
               </button>

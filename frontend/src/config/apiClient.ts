@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core';
 import {
   forceLogoutAndRedirect,
   inferScopeFromPathname,
@@ -6,12 +7,32 @@ import {
 } from '../utils/sessionRedirect';
 import { toUserFriendlyError } from '../utils/userFriendlyErrors';
 
-const resolveBaseUrl = () =>
+export const isNativePlatform = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  if ((window as any).Capacitor?.isNativePlatform?.()) return true;
+  try {
+    if (Capacitor.isNativePlatform()) return true;
+  } catch {
+    // fallback
+  }
+  const origin = String(window.location.origin || '').toLowerCase();
+  const protocol = String(window.location.protocol || '').toLowerCase();
+  const hostname = String(window.location.hostname || '').toLowerCase();
+  if (protocol === 'capacitor:' || protocol === 'ionic:') return true;
+  if (origin.startsWith('capacitor://') || origin.startsWith('ionic://')) return true;
+  if (hostname === 'localhost' && !import.meta.env.DEV) return true;
+  return false;
+};
+
+export const getApiBaseUrl = (): string => 
+
+
 {
+  if (isNativePlatform()) return 'https://janocaminho.com.br/api';
   return import.meta.env.VITE_API_BASE_URL || '/api';
 };
 
-const API_BASE_URL = resolveBaseUrl();
+
 
 const defaultHeaders: Record<string, string> = {
   'Content-Type': 'application/json',
@@ -63,7 +84,7 @@ const getDestinationPartnerToken = (): string | null => {
 const buildUrl = (path: string) =>
 {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  return `${API_BASE_URL}${normalizedPath}`;
+  return `${getApiBaseUrl()}${normalizedPath}`;
 };
 
 const handleResponse = async (
@@ -313,8 +334,8 @@ const rawRequest = async (path: string, options: any = {}) =>
 };
 
 export const apiClient = {
-  get: (path: string, options: any = {}) => request(path, { ...options }),
-  post: (path: string, body: any, options: any = {}) => request(path, { method: 'POST', body, ...options }),
+  get: <T = any>(path: string, options: any = {}): Promise<T> => request(path, { ...options }),
+  post: <T = any>(path: string, body: any, options: any = {}): Promise<T> => request(path, { method: 'POST', body, ...options }),
   put: (path: string, body: any, options: any = {}) => request(path, { method: 'PUT', body, ...options }),
   patch: (path: string, body: any, options: any = {}) => request(path, { method: 'PATCH', body, ...options }),
   delete: (path: string, options: any = {}) => request(path, { method: 'DELETE', ...options }),

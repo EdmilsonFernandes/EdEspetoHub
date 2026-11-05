@@ -34,11 +34,11 @@ export const motoboyService = {
   async disconnectMercadoPago() {
     return apiClient.delete('/motoboy/payment-accounts/mercadopago');
   },
-  async startJanoKyc(payload: { cpf: string; birthDate: string; fullName?: string }) {
-    return apiClient.post('/motoboy/kyc/jano/start', payload);
+  async startDiditKyc(payload: { cpf: string; birthDate: string; fullName?: string }) {
+    return apiClient.post('/motoboy/kyc/didit/start', payload);
   },
-  async checkJanoKyc() {
-    return apiClient.post('/motoboy/kyc/jano/check', {});
+  async checkDiditKyc() {
+    return apiClient.post('/motoboy/kyc/didit/check', {});
   },
   async acceptOrder(orderId: string) {
     return apiClient.post(`/motoboy/orders/${orderId}/accept`, {});

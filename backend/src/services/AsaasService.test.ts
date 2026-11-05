@@ -235,7 +235,7 @@ describe('AsaasService.getCharge (polling)', () => {
 });
 
 describe('resolvePlatformPixChain (fallback)', () => {
-  let originalEnv: { provider: string; asaasKey: string; openpixKey: string } | null = null;
+  let originalEnv: { provider: string; asaasKey: string; openpixKey: string; mpEnabled: boolean; mpToken: string } | null = null;
 
   beforeEach(() => {
     if (!originalEnv) {
@@ -243,9 +243,13 @@ describe('resolvePlatformPixChain (fallback)', () => {
         provider: env.payments.providerDefault,
         asaasKey: env.asaas.apiKey,
         openpixKey: env.openpix.appId,
+        mpEnabled: env.payments.mpEnabled,
+        mpToken: env.mercadoPago.accessToken,
       };
     }
     env.payments.providerDefault = 'mp';
+    env.payments.mpEnabled = true;
+    env.mercadoPago.accessToken = 'MP-TEST-TOKEN';
     env.asaas.apiKey = 'test-asaas-key';
     env.openpix.appId = 'Application test-openpix';
   });
@@ -281,12 +285,36 @@ describe('resolvePlatformPixChain (fallback)', () => {
     expect(resolvePlatformPixChain(29.9)).toEqual(['mp']);
   });
 
+  // Gate MP (30/10): Mercado Pago é contingência DESATIVADA por padrão — a
+  // reativação é administrativa (PAYMENTS_MP_ENABLED=true). Sem ela o MP sai
+  // de TODAS as cadeias; cadeia vazia = PIX de plataforma indisponível.
+  it('MP DESATIVADO (gate off) → mp some da cadeia em qualquer providerDefault', () => {
+    env.payments.mpEnabled = false;
+    env.payments.providerDefault = 'asaas';
+    expect(resolvePlatformPixChain(29.9)).toEqual(['asaas', 'openpix']);
+    env.payments.providerDefault = 'openpix';
+    expect(resolvePlatformPixChain(29.9)).toEqual(['openpix']);
+    env.payments.providerDefault = 'mp';
+    expect(resolvePlatformPixChain(29.9)).toEqual([]);
+  });
+
+  it('gate on mas MP_ACCESS_TOKEN ausente → isMercadoPagoEnabled() false (mp não entra)', async () => {
+    env.payments.mpEnabled = true;
+    env.mercadoPago.accessToken = '';
+    const mod = await import('./AsaasService');
+    expect(mod.isMercadoPagoEnabled()).toBe(false);
+    env.payments.providerDefault = 'asaas';
+    expect(resolvePlatformPixChain(29.9)).toEqual(['asaas', 'openpix']);
+  });
+
   afterAll(() => {
     // restaura env original (outros testes do repo dependem dela)
     if (originalEnv) {
       env.payments.providerDefault = originalEnv.provider as typeof env.payments.providerDefault;
       env.asaas.apiKey = originalEnv.asaasKey;
       env.openpix.appId = originalEnv.openpixKey;
+      env.payments.mpEnabled = originalEnv.mpEnabled;
+      env.mercadoPago.accessToken = originalEnv.mpToken;
     }
   });
 });

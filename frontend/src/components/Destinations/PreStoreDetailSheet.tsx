@@ -2,15 +2,16 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  ArrowSquareOut,
   ArrowUpRight,
   CheckCircle,
-  ClipboardText,
-  CreditCard,
+  Copy,
   ForkKnife,
   GlobeHemisphereWest,
+  MapPin,
   MapPinLine,
+  NavigationArrow,
   PhoneCall,
-  ShoppingBagOpen,
   Sparkle,
   Storefront,
   WhatsappLogo,
@@ -20,87 +21,10 @@ import {
 import { openActionTarget } from '../../utils/actionLink';
 import { AppImagePreviewDialog } from '../common/AppImagePreviewDialog';
 import { AirbnbIcon, GoogleMapsIcon, isAirbnbUrlOrLabel } from '../common/BrandActionIcons';
-import { Button, IconButton, SkeletonBlock, SurfaceCard } from '../ui';
 
 const InstagramIcon = ({ className = 'h-4 w-4' }) => (
-  <img src="/insta.avif" alt="" className={`${className} rounded-full object-cover`} />
+  <img src="/insta.avif" alt="Instagram" className={`${className} rounded-full object-cover`} />
 );
-
-const actionClasses: Record<string, string> = {
-  whatsapp: 'border-emerald-500 bg-[linear-gradient(135deg,#16a34a,#22c55e)] text-white shadow-[0_18px_34px_-24px_rgba(22,163,74,0.72)]',
-  phone: 'border-[#2563EB]/12 bg-white text-[#2563EB]',
-  instagram: 'border-pink-100 bg-white text-slate-700',
-  site: 'border-slate-200 bg-white text-slate-700',
-  route: 'border-[#2563EB]/12 bg-[#2563EB] text-white',
-};
-
-const actionIcon = (action: any) => {
-  const kind = action?.kind;
-  if (kind === 'whatsapp') return <WhatsappLogo size={16} weight="fill" />;
-  if (kind === 'phone') return <PhoneCall size={16} weight="duotone" />;
-  if (kind === 'instagram') return <InstagramIcon className="h-4 w-4" />;
-  if (kind === 'route') return <GoogleMapsIcon className="h-5 w-5" />;
-  if (kind === 'site' && (isAirbnbUrlOrLabel(action?.href) || isAirbnbUrlOrLabel(action?.label))) {
-    return <AirbnbIcon className="h-4 w-4 rounded-[0.25rem]" />;
-  }
-  return <GlobeHemisphereWest size={16} weight="duotone" />;
-};
-
-const ContactAction = ({ action }: any) => {
-  if (!action?.href) return null;
-  const isWhatsapp = action.kind === 'whatsapp';
-  const className = action.kind === 'route'
-    ? 'flex min-h-12 w-full items-center justify-center gap-2 rounded-[1.05rem] border border-[#2563EB]/12 bg-[#2563EB] px-4 py-3 text-sm font-extrabold text-white shadow-[0_18px_34px_-28px_rgba(51,104,134,0.68)] transition hover:-translate-y-0.5 active:scale-[0.98]'
-    : `inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition hover:-translate-y-0.5 active:scale-[0.98] ${isWhatsapp ? 'py-2.5' : 'py-2'} ${actionClasses[action.kind] || actionClasses.site}`;
-
-  const handleClick = async (event: any) => {
-    if (action.kind === 'whatsapp') {
-      event.preventDefault();
-      if (action.native) {
-        try {
-          const { Browser } = await import('@capacitor/browser');
-          await Browser.open({ url: action.href });
-        } catch {
-          window.open(action.href, '_blank', 'noopener,noreferrer');
-        }
-        return;
-      }
-      window.open(action.href, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    if (!action.external) return;
-    event.preventDefault();
-    void openActionTarget({ href: action.href, external: true });
-  };
-
-  if (action.kind === 'route' && String(action.href || '').startsWith('/')) {
-    return (
-      <Link to={action.href} className={className}>
-        {actionIcon(action)}
-        {action.label}
-      </Link>
-    );
-  }
-
-  return (
-    <a
-      href={action.href}
-      onClick={handleClick}
-      target={action.external || (!action.native && action.kind === 'whatsapp') ? '_blank' : undefined}
-      rel="noreferrer"
-      className={className}
-    >
-      {actionIcon(action)}
-      {isWhatsapp ? (
-        <span className="flex flex-col items-start leading-none">
-          <span>{action.label || 'WhatsApp'}</span>
-          <span className="mt-1 text-[10px] font-black uppercase tracking-[0.12em] text-white/78">Resposta mais rápida</span>
-        </span>
-      ) : action.label}
-    </a>
-  );
-};
 
 const normalizeContent = (value?: string) =>
   String(value || '')
@@ -111,17 +35,16 @@ const normalizeContent = (value?: string) =>
     .toLowerCase();
 
 export const PreStoreCardSkeleton = ({ compact = false }: any) => (
-  <SurfaceCard as="article" padding="sm" className={`rounded-[1.35rem] border-slate-200/80 bg-white ${compact ? '' : 'min-h-[6.5rem]'}`}>
-    <div className="flex animate-pulse gap-3">
-      <SkeletonBlock className={`${compact ? 'h-12 w-12' : 'h-16 w-16'} shrink-0`} rounded="lg" />
+  <div className={`rounded-[1.5rem] border border-slate-200/80 bg-white p-4 shadow-sm ${compact ? '' : 'min-h-[6.5rem]'}`}>
+    <div className="flex animate-pulse gap-3.5">
+      <div className={`${compact ? 'h-14 w-14' : 'h-18 w-18'} shrink-0 rounded-2xl bg-slate-200`} />
       <div className="min-w-0 flex-1 space-y-2 py-1">
-        <SkeletonBlock className="h-3 w-24" rounded="full" />
-        <SkeletonBlock className="h-4 w-3/4" rounded="full" />
-        <SkeletonBlock className="h-3 w-full bg-slate-100" rounded="full" />
-        <SkeletonBlock className="h-3 w-2/3 bg-slate-100" rounded="full" />
+        <div className="h-3.5 w-24 rounded-full bg-slate-200" />
+        <div className="h-4.5 w-3/4 rounded-full bg-slate-200" />
+        <div className="h-3 w-full rounded-full bg-slate-100" />
       </div>
     </div>
-  </SurfaceCard>
+  </div>
 );
 
 export function PreStoreDetailSheet({
@@ -180,228 +103,259 @@ export function PreStoreDetailSheet({
     try {
       await navigator.clipboard.writeText(url);
       setRouteCopied(true);
-      window.setTimeout(() => setRouteCopied(false), 2200);
+      window.setTimeout(() => setRouteCopied(false), 2000);
     } catch {
       setRouteCopied(false);
     }
   };
 
-  const actions = [
-    primaryAction,
-    instagramUrl ? { href: instagramUrl, label: 'Instagram', kind: 'instagram', external: true } : null,
-    websiteUrl ? { href: websiteUrl, label: websiteLabel, kind: 'site', external: true } : null,
-  ].filter(Boolean);
-  const contactActions = actions.filter((action: any) => ['whatsapp', 'phone'].includes(action.kind));
-  const socialActions = actions.filter((action: any) => !['whatsapp', 'phone'].includes(action.kind));
+  const handleWhatsappClick = async (event: any) => {
+    if (!primaryAction?.href) return;
+    event.preventDefault();
+    if (primaryAction.native) {
+      try {
+        const { Browser } = await import('@capacitor/browser');
+        await Browser.open({ url: primaryAction.href });
+      } catch {
+        window.open(primaryAction.href, '_blank', 'noopener,noreferrer');
+      }
+      return;
+    }
+    window.open(primaryAction.href, '_blank', 'noopener,noreferrer');
+  };
+
   const rawDescription = String(listing.description || '').trim();
   const normalizedDescription = normalizeContent(rawDescription);
   const normalizedAddress = normalizeContent(address);
   const descriptionText =
     rawDescription && normalizedDescription !== normalizedAddress
       ? rawDescription
-      : `Contato local em ${destination?.city || destination?.name || 'este destino'}.`;
+      : `Atendimento local selecionado para sua estadia em ${destination?.city || destination?.name || 'este destino'}.`;
+
+  const isWhatsapp = primaryAction?.kind === 'whatsapp' || primaryAction?.href?.includes('whatsapp') || primaryAction?.href?.includes('api.whatsapp');
 
   return (
-    <div className="fixed inset-0 z-[240] flex items-end bg-slate-950/38 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4" role="dialog" aria-modal="true" aria-label={`Detalhes de ${listing.title || 'serviço'}`}>
-      <button type="button" aria-label="Fechar detalhes" className="absolute inset-0 cursor-default" onClick={onClose} />
-      <SurfaceCard as="section" padding="none" className="w-full max-w-2xl rounded-t-[2rem] border-white/70 bg-[#f7f1e8] shadow-[0_30px_90px_-42px_rgba(15,23,42,0.7)] sm:max-h-[92dvh] sm:rounded-[2rem]">
-        <div className="max-h-[92dvh] overflow-y-auto pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <div
+      className="fixed inset-0 z-[240] flex items-end justify-center bg-slate-950/60 backdrop-blur-sm transition-opacity sm:items-center sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Detalhes de ${listing.title || 'serviço'}`}
+    >
+      {/* Backdrop */}
+      <button
+        type="button"
+        aria-label="Fechar detalhes"
+        className="absolute inset-0 cursor-default focus:outline-none"
+        onClick={onClose}
+      />
+
+      {/* Sheet Modal Container */}
+      <div className="relative w-full max-w-lg overflow-hidden rounded-t-[2.2rem] border border-white/60 bg-white shadow-2xl sm:max-h-[90vh] sm:rounded-[2.2rem]">
+        {/* Grabber pill (mobile) */}
+        <div className="mx-auto mt-2.5 h-1 w-10 rounded-full bg-slate-300 sm:hidden" />
+
+        <div className="max-h-[88vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {/* Hero Banner / Cover Section */}
           <div className="relative bg-slate-900">
-            <div className="aspect-[16/9] max-h-[19rem] w-full overflow-hidden relative">
+            <div className="aspect-[16/9] max-h-[16rem] w-full overflow-hidden relative">
               {hasImage && imageUrl ? (
                 <div
-                  className="relative h-full w-full group cursor-zoom-in overflow-hidden"
+                  className="relative h-full w-full group cursor-zoom-in"
                   onClick={() => setPreviewImage({ src: imageUrl, title: listing.title })}
                 >
-                  <img src={imageUrl} alt={listing.title} className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-sm shadow-md">
-                      <MagnifyingGlass size={14} weight="bold" />
-                      Ampliar imagem
-                    </span>
-                  </div>
+                  <img
+                    src={imageUrl}
+                    alt={listing.title}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent" />
+                  <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-bold text-white/90 backdrop-blur-md">
+                    <MagnifyingGlass size={13} weight="bold" />
+                    Ampliar
+                  </span>
                 </div>
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_30%_20%,rgba(245,158,11,0.28),transparent_34%),linear-gradient(135deg,#17384c,#0f172a_64%,#403017)]">
-                  <Storefront size={74} weight="duotone" className="text-white/42" />
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-800 to-slate-950">
+                  <Storefront size={64} weight="duotone" className="text-white/30" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-transparent to-transparent" />
                 </div>
               )}
             </div>
-            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-950/72 via-slate-950/16 to-transparent" />
-            <IconButton
-              onClick={onClose}
-              icon={<X size={18} weight="bold" />}
-              label="Fechar"
-              className="absolute right-3 top-3 z-30 bg-slate-950/82 text-white shadow-[0_12px_32px_-14px_rgba(0,0,0,0.75)] ring-2 ring-white/80 backdrop-blur-md hover:bg-slate-950"
-            />
-            <div className="absolute bottom-4 left-4 right-4">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/92 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#153A4C] shadow-sm">
-                <ForkKnife size={13} weight="duotone" />
-                {categoryLabel || 'Serviço local'}
-              </span>
-              <h2 className="mt-2 text-2xl font-extrabold leading-tight tracking-[-0.04em] text-white sm:text-3xl">{listing.title}</h2>
-            </div>
-          </div>
 
-          <div className="space-y-4 p-4 sm:p-5">
-            <SurfaceCard padding="md" className="rounded-[1.5rem] border-white/80 bg-white/88">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E0EBFD] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#2563EB]">
-                  <ShoppingBagOpen size={14} weight="duotone" />
-                  Contato direto
+            {/* Botão Fechar no canto superior */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute right-3.5 top-3.5 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-slate-950/70 text-white shadow-lg backdrop-blur-md hover:bg-slate-900 active:scale-95"
+              aria-label="Fechar"
+            >
+              <X size={18} weight="bold" />
+            </button>
+
+            {/* Informações sobre a foto */}
+            <div className="absolute bottom-4 left-4 right-4 z-10 text-white">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
+                  <ForkKnife size={12} weight="duotone" />
+                  {categoryLabel || 'Serviço local'}
                 </span>
-                {placeName ? (
-                  <span className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-[11px] font-bold text-amber-800">
-                    <Sparkle size={13} weight="duotone" />
-                    <span className="truncate">Atende {placeName}</span>
+                {routeDistanceLabel ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/90 px-2.5 py-1 text-[11px] font-black text-white shadow-sm backdrop-blur-md">
+                    <NavigationArrow size={12} weight="fill" />
+                    {routeDistanceLabel} do chalé
                   </span>
                 ) : null}
               </div>
 
-              <p className="mt-3 text-sm font-medium leading-relaxed text-slate-600">{descriptionText}</p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">
+                {listing.title}
+              </h2>
+            </div>
+          </div>
 
-              {address ? (
-                <p className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full bg-slate-50 px-3 py-2 text-xs font-bold text-slate-600">
-                  <MapPinLine size={15} weight="duotone" className="shrink-0 text-[#2563EB]" />
-                  <span className="truncate">{address}</span>
-                </p>
-              ) : null}
+          {/* Conteúdo do Modal */}
+          <div className="space-y-4 p-5">
+            {/* Tag de Atendimento ao Chalé */}
+            {placeName ? (
+              <div className="flex items-center gap-2 rounded-2xl bg-amber-50/80 px-3.5 py-2.5 text-xs font-bold text-amber-900 border border-amber-200/60">
+                <Sparkle size={16} weight="fill" className="shrink-0 text-amber-600" />
+                <span>Atende hóspedes de <strong>{placeName}</strong></span>
+              </div>
+            ) : null}
 
-              {routeAction?.href ? (
-                <SurfaceCard tone="brand" padding="sm" className="mt-4 rounded-[1.4rem] border-[#2563EB]/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(238,247,242,0.9))] text-slate-900 ring-1 ring-white/80">
-                  <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-[#2563EB]">
-                    <GoogleMapsIcon className="h-4 w-4" />
-                    Referência para entrega
-                  </p>
-                  <SurfaceCard tone="soft" padding="sm" className="mt-3 rounded-[1.15rem] border-white/80 bg-white/86 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
-                    <div className="flex items-center gap-2">
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#E0EBFD] text-[#2563EB] ring-1 ring-[#cfe0ea]">
-                        <Storefront size={17} weight="duotone" />
-                      </span>
-                      <span className="h-0.5 flex-1 rounded-full bg-[linear-gradient(90deg,#2563EB_0%,rgba(51,104,134,0.16)_100%)]" />
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-100">
-                        <MapPinLine size={17} weight="duotone" />
-                      </span>
-                    </div>
-                    <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-start gap-2 text-2xs font-black tracking-[0.02em] text-slate-400">
-                      <span className="truncate">{listing.title || 'Serviço'}</span>
-                      <span className="text-[#2563EB]">{routeDistanceLabel || 'rota'}</span>
-                      <span className="truncate text-right">{placeName || 'Chalé'}</span>
-                    </div>
-                  </SurfaceCard>
-                  <p className="mt-2 text-sm font-semibold leading-relaxed text-slate-600">
-                    Mostra a distância entre este serviço e a sua hospedagem para orientar a entrega.
-                  </p>
-                  <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
-                    {onOpenRoute ? (
-                      <button
-                        type="button"
-                        onClick={onOpenRoute}
-                        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-[1.05rem] border border-[#2563EB]/12 bg-[#2563EB] px-4 py-3 text-sm font-extrabold text-white shadow-[0_18px_34px_-28px_rgba(51,104,134,0.68)] transition hover:-translate-y-0.5 active:scale-[0.98]"
-                      >
-                        <GoogleMapsIcon className="h-5 w-5" />
-                        {routeAction?.label || 'Ver rota até meu chalé'}
-                      </button>
-                    ) : (
-                      <ContactAction action={routeAction} />
-                    )}
-                    <Button
-                      onClick={copyRouteLink}
-                      variant={routeCopied ? 'success' : 'secondary'}
-                      size="lg"
-                      leftIcon={routeCopied ? <CheckCircle size={16} weight="fill" /> : <ClipboardText size={16} weight="duotone" />}
-                      className="rounded-[1.05rem] hover:-translate-y-0.5"
-                    >
-                      {routeCopied ? 'Copiado' : 'Copiar rota'}
-                    </Button>
+            {/* Descrição Limpa */}
+            <p className="text-sm font-medium leading-relaxed text-slate-600">
+              {descriptionText}
+            </p>
+
+            {/* Endereço sutil */}
+            {address ? (
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+                <MapPin size={15} weight="duotone" className="shrink-0 text-slate-400" />
+                <span className="truncate">{address}</span>
+              </div>
+            ) : null}
+
+            {/* Rota até o chalé (Design minimalista e sem poluição) */}
+            {routeAction?.href ? (
+              <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/80 p-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-[#2563EB]">
+                    <GoogleMapsIcon className="h-5 w-5" />
                   </div>
-                </SurfaceCard>
+                  <div>
+                    <p className="text-xs font-black text-slate-900">
+                      {routeDistanceLabel ? `${routeDistanceLabel} de distância` : 'Rota do mapa'}
+                    </p>
+                    <p className="text-[11px] font-medium text-slate-500">
+                      Até seu chalé
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  {onOpenRoute ? (
+                    <button
+                      type="button"
+                      onClick={onOpenRoute}
+                      className="inline-flex items-center gap-1 rounded-xl bg-white px-3 py-1.5 text-xs font-bold text-[#2563EB] shadow-2xs border border-slate-200 hover:bg-slate-50"
+                    >
+                      <NavigationArrow size={13} weight="bold" />
+                      Ver rota
+                    </button>
+                  ) : (
+                    <a
+                      href={routeAction.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 rounded-xl bg-white px-3 py-1.5 text-xs font-bold text-[#2563EB] shadow-2xs border border-slate-200 hover:bg-slate-50"
+                    >
+                      <NavigationArrow size={13} weight="bold" />
+                      Ver rota
+                    </a>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={copyRouteLink}
+                    className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                    title="Copiar link da rota"
+                  >
+                    {routeCopied ? <CheckCircle size={15} weight="fill" className="text-emerald-600" /> : <Copy size={15} />}
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
+            {/* Ação Primária: WhatsApp Direto */}
+            {primaryAction?.href ? (
+              <div className="pt-2">
+                <a
+                  href={primaryAction.href}
+                  onClick={handleWhatsappClick}
+                  target={primaryAction.native ? undefined : '_blank'}
+                  rel="noreferrer"
+                  className="flex w-full items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 py-3.5 text-sm font-black text-white shadow-lg shadow-emerald-600/25 transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+                >
+                  <WhatsappLogo size={20} weight="fill" />
+                  <span>Pedir ou Falar pelo WhatsApp</span>
+                </a>
+              </div>
+            ) : null}
+
+            {/* Outros Canais em linha horizontal limpa */}
+            <div className="flex items-center gap-2 pt-1">
+              {instagramUrl ? (
+                <a
+                  href={instagramUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                >
+                  <InstagramIcon className="h-4 w-4" />
+                  Instagram
+                </a>
               ) : null}
 
-              {actions.length > 0 ? (
-                <div className="mt-4 space-y-3">
-                  {contactActions.length > 0 ? (
-                    <div>
-                      <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Contato</p>
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        {contactActions.map((action: any) => (
-                          <ContactAction key={`${action.kind}-${action.href}`} action={action} />
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-                  {socialActions.length > 0 ? (
-                    <div>
-                      <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Canais oficiais</p>
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        {socialActions.map((action: any) => (
-                          <ContactAction key={`${action.kind}-${action.href}`} action={action} />
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              ) : !routeAction?.href ? (
-                <p className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500">Contato ainda não informado.</p>
+              {websiteUrl ? (
+                <a
+                  href={websiteUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                >
+                  {isAirbnbUrlOrLabel(websiteUrl) || isAirbnbUrlOrLabel(websiteLabel) ? (
+                    <AirbnbIcon className="h-4 w-4 rounded-xs" />
+                  ) : (
+                    <GlobeHemisphereWest size={16} weight="duotone" />
+                  )}
+                  {websiteLabel}
+                </a>
               ) : null}
-            </SurfaceCard>
+            </div>
 
-            <SurfaceCard tone="brand" padding="md" className="rounded-[1.5rem] border-[#153A4C]/10 bg-white">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#2563EB]">Como parceiro oficial</p>
-                  <h3 className="mt-1 text-lg font-extrabold tracking-[-0.03em] text-slate-950">Vitrine digital no app</h3>
-                  <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">Venda, receba contatos ou pedidos sem tirar o hóspede do Já no Caminho.</p>
-                </div>
-                <Storefront size={25} weight="duotone" className="shrink-0 text-[#153A4C]" />
-              </div>
-              <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                {[
-                  { icon: ForkKnife, title: 'Produtos', text: 'Itens, fotos e preços.' },
-                  { icon: CreditCard, title: 'Pagamento', text: 'Pedido e pagamento online.' },
-                  { icon: ShoppingBagOpen, title: 'Pedidos', text: 'Hóspede compra no app.' },
-                ].map((item: any) => {
-                  const Icon = item.icon;
-                  return (
-                    <SurfaceCard key={item.title} tone="soft" padding="sm" className="rounded-[1.15rem] border-transparent bg-[#f6f2e9] shadow-none">
-                      <Icon size={21} weight="duotone" className="text-[#153A4C]" />
-                      <p className="mt-2 text-sm font-extrabold text-slate-900">{item.title}</p>
-                      <p className="mt-1 text-xs font-medium leading-snug text-slate-500">{item.text}</p>
-                    </SurfaceCard>
-                  );
-                })}
-              </div>
-            </SurfaceCard>
-
+            {/* Rodapé discreto para parceiro/negócio */}
             {claimHref ? (
-              <Link
-                to={claimHref}
-                onClick={onClose}
-                className="group flex items-center gap-3 rounded-[1.5rem] bg-[#153A4C] p-4 text-white shadow-[0_20px_50px_-34px_rgba(21,58,76,0.9)] transition hover:-translate-y-0.5"
-              >
-                <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/12 ring-1 ring-white/18">
-                  <Sparkle size={22} weight="duotone" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-extrabold">É o seu negócio?</span>
-                  <span className="mt-0.5 block text-xs font-medium leading-relaxed text-white/72">
-                    Ative sua vitrine digital, aceite pagamentos e receba pedidos ou contatos direto dos hóspedes.
-                  </span>
-                  <span className="mt-3 inline-flex rounded-full bg-white px-3 py-2 text-xs font-extrabold text-[#153A4C] sm:hidden">
-                    Quero cadastrar meu negócio
-                  </span>
-                </span>
-                <span className="hidden shrink-0 items-center gap-1 rounded-full bg-white px-3 py-2 text-xs font-extrabold text-[#153A4C] sm:inline-flex">
-                  Virar loja oficial
+              <div className="border-t border-slate-100 pt-3 text-center">
+                <Link
+                  to={claimHref}
+                  onClick={onClose}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-slate-700 transition"
+                >
+                  <span>É dono deste estabelecimento? Ative sua vitrine oficial</span>
                   <ArrowUpRight size={13} weight="bold" />
-                </span>
-              </Link>
+                </Link>
+              </div>
             ) : null}
           </div>
         </div>
-      </SurfaceCard>
+      </div>
 
-      <AppImagePreviewDialog image={previewImage} onClose={() => setPreviewImage(null)} label="Imagem ampliada do local" />
+      <AppImagePreviewDialog
+        image={previewImage}
+        onClose={() => setPreviewImage(null)}
+        label="Imagem do local"
+      />
     </div>
   );
 }

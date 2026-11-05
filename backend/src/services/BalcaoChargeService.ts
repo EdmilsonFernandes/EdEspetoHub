@@ -11,7 +11,7 @@ import {
 import { MercadoPagoService } from './MercadoPagoService';
 import { MercadoPagoPointService } from './MercadoPagoPointService';
 import { OpenPixService, toOpenPixCents } from './OpenPixService';
-import { AsaasService, resolvePlatformPixChain } from './AsaasService';
+import { AsaasService, isMercadoPagoEnabled, resolvePlatformPixChain } from './AsaasService';
 import { OrderPaymentService } from './OrderPaymentService';
 import { PaymentAuditService } from './PaymentAuditService';
 import { StorePaymentAccountService } from './StorePaymentAccountService';
@@ -265,10 +265,10 @@ export class BalcaoChargeService {
     }
 
     const accessToken = await this.accounts.getActiveAccessToken(storeId).catch(() => null);
-    const mpEnabled = Boolean(accessToken);
+    const mpEnabled = Boolean(accessToken) && isMercadoPagoEnabled();
     // WAVE 2 + ASAAS: PIX do balcão pode sair pela plataforma (Asaas/OpenPix,
     // cadeia completa) mesmo sem a loja ter MP conectado — maquininha Point
-    // continua exigindo MP.
+    // continua exigindo MP (e só com o MP reativado, 30/10).
     const platformPixEnabled = resolvePlatformPixChain(Number(order.total || 0)).some((p) => p !== 'mp');
 
     return {
@@ -282,7 +282,11 @@ export class BalcaoChargeService {
         pix: mpEnabled || platformPixEnabled,
         point: mpEnabled,
         cash: true,
-        reason: mpEnabled || platformPixEnabled ? null : 'Conecte a conta Mercado Pago da loja para Pix e maquininha.',
+        reason: mpEnabled || platformPixEnabled
+          ? null
+          : isMercadoPagoEnabled()
+            ? 'Conecte a conta Mercado Pago da loja para Pix e maquininha.'
+            : 'Pix da plataforma indisponível agora e Mercado Pago desativado — cobre no dinheiro ou tente mais tarde.',
       },
     };
   }
@@ -493,6 +497,11 @@ export class BalcaoChargeService {
         }
       }
       if (!pixViaPlatform) {
+      if (!isMercadoPagoEnabled()) {
+        throw new AppError('PAY-017', 400, {
+          message: 'Pix temporariamente indisponível (nenhum provedor da plataforma respondeu e o Mercado Pago está desativado).',
+        });
+      }
       const accessToken = await this.accounts.getActiveAccessToken(input.storeId);
       if (!accessToken) {
         throw new AppError('PAY-017', 400, {
@@ -534,6 +543,11 @@ export class BalcaoChargeService {
     }
 
     if (input.method === 'point') {
+      if (!isMercadoPagoEnabled()) {
+        throw new AppError('PAY-022', 400, {
+          message: 'Maquininha indisponível no momento (integração Mercado Pago desativada).',
+        });
+      }
       const accessToken = await this.accounts.getActiveAccessToken(input.storeId);
       if (!accessToken) {
         throw new AppError('PAY-017', 400, {
@@ -608,9 +622,7 @@ export class BalcaoChargeService {
     await this.audit.record({
       provider: isBalcaoManualMethod(input.method)
         ? 'MANUAL'
-        : String(row.provider || '').toUpperCase() === 'OPENPIX'
-          ? 'OPENPIX'
-          : 'MERCADO_PAGO',
+        : (String(row.provider || '').toUpperCase() as 'MERCADO_PAGO' | 'OPENPIX' | 'ASAAS'),
       flowType: PAYMENT_AUDIT_FLOW.ORDER,
       eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
       entityType: PAYMENT_AUDIT_ENTITY.ORDER_PAYMENT,

@@ -12,7 +12,6 @@
  */
 
 import { EntityManager } from 'typeorm';
-import QRCode from 'qrcode';
 import { Payment, PaymentMethod } from '../entities/Payment';
 import { Subscription } from '../entities/Subscription';
 import { Plan } from '../entities/Plan';
@@ -27,7 +26,7 @@ import { PromoPush } from '../entities/PromoPush';
 import { AppDataSource } from '../config/database';
 import { MercadoPagoService } from './MercadoPagoService';
 import { OpenPixService, toOpenPixCents } from './OpenPixService';
-import { AsaasService, resolvePlatformPixChain } from './AsaasService';
+import { AsaasService, isMercadoPagoEnabled, resolvePlatformPixChain } from './AsaasService';
 import { PromoPushService } from './PromoPushService';
 import { DestinationPromotionService } from './DestinationPromotionService';
 import { env } from '../config/env';
@@ -229,13 +228,19 @@ private resolvePlanChargeAmount(plan: Plan) {
   ) {
     const paymentRepo = manager.getRepository(Payment);
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
-    const mockLinkBase =
-      data.method === 'BOLETO'
-        ? 'https://pay.janocaminho.com/boleto'
-        : 'https://pay.janocaminho.com/checkout';
+    // Cartão/boleto só existem via Mercado Pago — contingência DESATIVADA por
+    // padrão (30/10). Sem reativação explícita o método é recusado com erro
+    // claro; NUNCA mais o link fake pay.janocaminho.com/checkout/{id}.
+    if ((data.method === 'CREDIT_CARD' || data.method === 'BOLETO') && !isMercadoPagoEnabled()) {
+      throw new AppError('PAY-016', 400, {
+        message: data.method === 'CREDIT_CARD'
+          ? 'Pagamento por cartão indisponível no momento. Pague a assinatura via Pix.'
+          : 'Pagamento por boleto indisponível no momento. Pague a assinatura via Pix.',
+      });
+    }
     const paymentLink =
       data.method === 'CREDIT_CARD' || data.method === 'BOLETO'
-        ? `${mockLinkBase}/${data.subscription.id}`
+        ? `https://pay.janocaminho.com/checkout/${data.subscription.id}`
         : null;
 
     const chargeAmount = this.resolvePlanChargeAmount(data.plan);
@@ -260,7 +265,7 @@ private resolvePlanChargeAmount(plan: Plan) {
 
     const planLabel = data.plan.displayName || data.plan.name;
     const description = `Assinatura ${planLabel} - ${data.store.name}`;
-    const mercadoPagoEnabled = Boolean(env.mercadoPago.accessToken);
+    const mercadoPagoEnabled = isMercadoPagoEnabled();
 
     // PIX de plataforma — cadeia de provedores (03/10 Wave Asaas):
     // PAYMENT_PROVIDER_DEFAULT=asaas → Asaas (se ≥R$5) → OpenPix → Mercado Pago.
@@ -377,13 +382,20 @@ private resolvePlanChargeAmount(plan: Plan) {
       }
     }
 
+    // Nenhum provedor PIX disponível (cadeia vazia + MP desativado) — o QR
+    // "PIX FAKE" de 2025 morreu (30/10): cobrança que não existe não pode ser
+    // exibida como pagável. Marca FAILED e devolve erro claro ao lojista.
     if (payment.method === 'PIX') {
-      const qrPayload = `PIX FAKE | Store: ${data.store.name} | Amount: ${Number(
-        chargeAmount
-      ).toFixed(2)} | PaymentId: ${payment.id}`;
-      payment.qrCodeBase64 = await QRCode.toDataURL(qrPayload);
-      payment.qrCodeText = qrPayload;
+      payment.status = 'FAILED';
       await paymentRepo.save(payment);
+      this.log.error('Assinatura PIX sem provedor disponível — payment marcado FAILED', {
+        paymentId: payment.id,
+        chain: resolvePlatformPixChain(chargeAmount),
+      });
+      throw new AppError('PAY-016', 400, {
+        message: 'Pagamento Pix indisponível no momento. Nenhum provedor respondeu — tente novamente em instantes.',
+        details: { paymentId: payment.id },
+      });
     }
 
     await this.notifySubscriptionCreated(payment, data);

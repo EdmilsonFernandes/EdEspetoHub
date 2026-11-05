@@ -139,7 +139,11 @@ export function HubStoreCard({
               decoding="async"
               className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${store.isOpen ? '' : 'grayscale opacity-70'}`}
               onError={(event) => {
-                (event.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name);
+                const target = event.target as HTMLImageElement;
+                const avatar = getStoreAvatarUrl(store.slug, store.name);
+                if (target.src !== avatar) {
+                  target.src = avatar;
+                }
               }}
             />
             <div className={`absolute inset-0 ${store.isOpen ? 'bg-gradient-to-t from-black/38 via-black/5 to-transparent' : 'bg-gradient-to-t from-black/20 via-transparent to-transparent'}`} />
@@ -175,7 +179,11 @@ export function HubStoreCard({
               decoding="async"
               className={`h-8 w-8 shrink-0 rounded-[0.65rem] bg-slate-50 object-cover ring-1 ring-slate-200/70 ${store.isOpen ? '' : 'grayscale opacity-60'}`}
               onError={(event) => {
-                (event.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name);
+                const target = event.target as HTMLImageElement;
+                const avatar = getStoreAvatarUrl(store.slug, store.name);
+                if (target.src !== avatar) {
+                  target.src = avatar;
+                }
               }}
             />
             <h3 className={`min-h-[2rem] min-w-0 flex-1 line-clamp-2 text-[13px] font-black leading-4 [overflow-wrap:anywhere] ${store.isOpen ? 'text-slate-950' : 'text-slate-500'}`}>
@@ -248,7 +256,11 @@ export function HubStoreCard({
           decoding="async"
           className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${storeAvailable ? '' : 'grayscale opacity-55'}`}
           onError={(event) => {
-            (event.target as HTMLImageElement).src = getStoreAvatarUrl(store.slug, store.name);
+            const target = event.target as HTMLImageElement;
+            const avatar = getStoreAvatarUrl(store.slug, store.name);
+            if (target.src !== avatar) {
+              target.src = avatar;
+            }
           }}
         />
         {!store.isOpen || isUnavailableForRegion ? <div className="absolute inset-0 bg-white/35" /> : null}

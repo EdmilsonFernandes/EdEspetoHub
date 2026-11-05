@@ -1,10 +1,11 @@
 import { AppDataSource } from '../config/database';
-import { env } from '../config/env';
 import { DestinationPromotion } from '../entities/DestinationPromotion';
 import { AppError } from '../errors/AppError';
 import { logger } from '../utils/logger';
+import { AsaasService, isMercadoPagoEnabled } from './AsaasService';
 import { MercadoPagoService } from './MercadoPagoService';
-import { OpenPixService, isOpenPixPlatformPixEnabled, toOpenPixCents } from './OpenPixService';
+import { OpenPixService } from './OpenPixService';
+import { createPlatformPixCharge } from './PlatformPixService';
 import { PaymentAuditService } from './PaymentAuditService';
 import {
   PAYMENT_AUDIT_ENTITY,
@@ -36,6 +37,7 @@ export class DestinationPromotionService {
   private repo = AppDataSource.getRepository(DestinationPromotion);
   private mercadoPago = new MercadoPagoService();
   private openPix = new OpenPixService();
+  private asaas = new AsaasService();
   private paymentAuditService = new PaymentAuditService();
   private log = logger.child({ scope: 'DestinationPromotionService' });
 
@@ -233,73 +235,69 @@ export class DestinationPromotionService {
     });
     const created = (await this.repo.save(row)) as DestinationPromotion;
 
-    const mpEnabled = Boolean(env.mercadoPago.accessToken);
+    const mpEnabled = isMercadoPagoEnabled();
     let providerId: string | null = null;
     let paymentLink: string | null = null;
     let qrCodeBase64: string | null = null;
     let qrCodeText: string | null = null;
     let usedProvider: string | null = null;
 
-    if (mpEnabled) {
+    // PIX de plataforma — cadeia única (30/10): Asaas (≥R$5+CPF) → OpenPix →
+    // MP apenas com reativação administrativa. Todos indisponíveis → PAY-016.
+    if (paymentMethod === 'PIX') {
+      const charge = await createPlatformPixCharge({
+        externalReference: `${PROMO_PREFIX}:${created.id}`,
+        amountBrl: amount,
+        comment: `Destaque Destino ${durationUnit} - ${resource.name}`,
+        // Email determinístico, nunca o dono da conta MP (evita 4390 payer email forbidden).
+        payer: {
+          name: `Parceiro - ${resource.name}`.slice(0, 80),
+          email: `destaque.destino+${created.id}@janocaminho.com.br`,
+        },
+        expiresInSec: 30 * 60,
+        mpAuditContext: {
+          flowType: PAYMENT_AUDIT_FLOW.DESTINATION_PROMO,
+          entityType: PAYMENT_AUDIT_ENTITY.DESTINATION_PROMO,
+          entityId: created.id,
+        },
+      });
+      providerId = charge.providerId;
+      paymentLink = charge.paymentLink;
+      qrCodeBase64 = charge.qrCodeImageBase64;
+      qrCodeText = charge.brCode;
+      usedProvider = charge.provider;
+    } else if (mpEnabled) {
       const description = `Destaque Destino ${durationUnit} - ${resource.name}`;
-      // WAVE 1 OpenPix: PIX de plataforma. Cartão segue Mercado Pago (intacto).
-      if (paymentMethod === 'PIX' && isOpenPixPlatformPixEnabled()) {
-        try {
-          const charge = await this.openPix.createCharge({
-            correlationID: `${PROMO_PREFIX}:${created.id}`,
-            valueBrlCents: toOpenPixCents(amount),
-            expiresInSec: 30 * 60,
-            comment: description,
-          });
-          providerId = charge.providerId;
-          paymentLink = null;
-          qrCodeBase64 = charge.qrCodeImageBase64;
-          qrCodeText = charge.brCode;
-          usedProvider = 'OPENPIX';
-        } catch (error) {
-          this.log.warn('OpenPix charge failed for destination promo, falling back to Mercado Pago', {
-            promotionId: created.id,
-            error,
-          });
-        }
-      }
-      if (!qrCodeText) {
-        const mp: any = await this.mercadoPago.createPayment({
-          amount,
-          method: paymentMethod,
-          description,
+      const mp: any = await this.mercadoPago.createPayment({
+        amount,
+        method: paymentMethod,
+        description,
+        externalReference: `${PROMO_PREFIX}:${created.id}`,
+        payer: {
+          email: `destaque.destino+${created.id}@janocaminho.com.br`,
+          name: `Parceiro - ${resource.name}`.slice(0, 80),
+        },
+        auditContext: {
+          flowType: PAYMENT_AUDIT_FLOW.DESTINATION_PROMO,
+          entityType: PAYMENT_AUDIT_ENTITY.DESTINATION_PROMO,
+          entityId: created.id,
           externalReference: `${PROMO_PREFIX}:${created.id}`,
-          // Email determinístico, nunca o dono da conta MP (evita 4390 payer email forbidden).
-          payer: {
-            email: `destaque.destino+${created.id}@janocaminho.com.br`,
-            name: `Parceiro - ${resource.name}`.slice(0, 80),
-          },
-          auditContext: {
-            flowType: PAYMENT_AUDIT_FLOW.DESTINATION_PROMO,
-            entityType: PAYMENT_AUDIT_ENTITY.DESTINATION_PROMO,
-            entityId: created.id,
-            externalReference: `${PROMO_PREFIX}:${created.id}`,
-            eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
-          },
-        });
-        providerId = String(mp?.providerId || '');
-        paymentLink = mp?.paymentLink || null;
-        qrCodeBase64 = mp?.qrCodeBase64
-          ? String(mp.qrCodeBase64).startsWith('data:image')
-            ? mp.qrCodeBase64
-            : `data:image/png;base64,${mp.qrCodeBase64}`
-          : null;
-        qrCodeText = mp?.qrCodeText || null;
-        usedProvider = 'MERCADO_PAGO';
-      }
-    }
-
-    // Nunca gerar QR fake: se não veio payload válido, propagar erro claro.
-    if (paymentMethod === 'PIX' && !qrCodeText) {
+          eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
+        },
+      });
+      providerId = String(mp?.providerId || '');
+      paymentLink = mp?.paymentLink || null;
+      qrCodeBase64 = mp?.qrCodeBase64
+        ? String(mp.qrCodeBase64).startsWith('data:image')
+          ? mp.qrCodeBase64
+          : `data:image/png;base64,${mp.qrCodeBase64}`
+        : null;
+      qrCodeText = mp?.qrCodeText || null;
+      usedProvider = 'MERCADO_PAGO';
+    } else {
+      // Cartão só existia via MP — desativado: erro claro, sem artefato fake.
       throw new AppError('PAY-016', 400, {
-        message: mpEnabled
-          ? 'Não foi possível gerar o QR Pix do destaque de destino no Mercado Pago. Verifique a configuração de pagamento (webhook/token) e tente novamente.'
-          : 'Pagamento online não configurado. Não é possível gerar o QR Pix do destaque agora.',
+        message: 'Pagamento por cartão indisponível no momento. Use o Pix para contratar o destaque.',
       });
     }
 
@@ -340,6 +338,23 @@ export class DestinationPromotionService {
     const provider = normalizeStatus(current.paymentProvider || undefined);
     const providerId = String(current.paymentProviderId || '').trim();
 
+    // ASAAS (30/10): polling por payment.id — webhook perdido não trava a promoção.
+    if (provider === 'ASAAS' && providerId) {
+      try {
+        const charge = await this.asaas.getCharge(providerId);
+        const providerStatus = String(charge?.status || '').toUpperCase();
+        if (['RECEIVED', 'CONFIRMED', 'RECEIVED_IN_CASH'].includes(providerStatus)) {
+          await this.markPaidFromWebhook(promotionId, { id: providerId, status: 'approved', status_detail: `asaas_${providerStatus.toLowerCase()}` }, 'ASAAS');
+        } else if (providerStatus === 'REFUNDED') {
+          await this.markFailedFromWebhook(promotionId, { id: providerId, status: 'refunded' }, 'ASAAS');
+        }
+      } catch {
+        /* mantém estado atual */
+      }
+      const latest = await this.repo.findOne({ where: { id: promotionId } });
+      return latest || current;
+    }
+
     // WAVE 1 OpenPix: polling por correlationID (providerId = correlationID).
     if (provider === 'OPENPIX' && providerId) {
       try {
@@ -354,7 +369,8 @@ export class DestinationPromotionService {
       return latest || current;
     }
 
-    if (provider !== 'MERCADO_PAGO' || !providerId || !env.mercadoPago.accessToken) return current;
+    // MP é contingência desativada: polling legado só com reativação explícita.
+    if (provider !== 'MERCADO_PAGO' || !providerId || !isMercadoPagoEnabled()) return current;
 
     try {
       const mpPayment: any = await this.mercadoPago.getPayment(providerId, undefined, {

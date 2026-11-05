@@ -38,7 +38,7 @@ export const HubFavoriteStores = memo(function HubFavoriteStores({
 
   return (
     <section
-      className="order-5 space-y-3"
+      className="order-3 space-y-3"
       style={{
         transition: 'all .45s ease',
         transitionDelay: '300ms',

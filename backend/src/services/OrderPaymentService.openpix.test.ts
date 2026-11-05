@@ -31,9 +31,9 @@ const { repoMock, mpCreatePayment, accountGetToken, openPixPostBodies } = vi.hoi
 
 vi.mock('../config/env', () => ({
   env: {
-    payments: { providerDefault: 'openpix' },
+    payments: { providerDefault: 'openpix', mpEnabled: true },
     openpix: { appId: 'test-openpix-app-id', apiBaseUrl: 'https://openpix.test' },
-    mercadoPago: { apiBaseUrl: 'https://api.mp.test' },
+    mercadoPago: { apiBaseUrl: 'https://api.mp.test', accessToken: 'mp-token-test' },
   },
 }));
 

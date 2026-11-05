@@ -37,34 +37,39 @@ export function MotoboyProfile() {
   const [refreshingDocs, setRefreshingDocs] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [profile, setProfile] = useState<any | null>(null);
-  // Piloto Jano KYC (verificação hospedada: doc + selfie + liveness)
+  // KYC Didit (verificação hospedada: doc + selfie + liveness) — integração
+  // direta, sem intermediários. O provedor ativo vem do BACKEND (kycProvider
+  // em /motoboy/profile): didit → mostra o card e esconde o fluxo manual de
+  // docs; manual (flag off) → UI manual volta sozinha, sem redeploy.
   // NOTA: este bloco precisa ficar DEPOIS da declaração de `profile` —
-  // janoBound/useEffect leem profile em escopo imediato (TDZ mata em prod).
-  const [janoCpf, setJanoCpf] = useState('');
-  const [janoBirth, setJanoBirth] = useState('');
-  const [janoBusy, setJanoBusy] = useState(false);
-  const [janoError, setJanoError] = useState('');
+  // diditBound/useEffect leem profile em escopo imediato (TDZ mata em prod).
+  const [diditCpf, setDiditCpf] = useState('');
+  const [diditBirth, setDiditBirth] = useState('');
+  const [diditBusy, setDiditBusy] = useState(false);
+  const [diditError, setDiditError] = useState('');
   // Identidade já vinculada (primeiro KYC grava CPF/nascimento) → campos travados
-  const janoBound = Boolean(profile?.kycCpf && profile?.kycBirthDate);
+  const diditBound = Boolean(profile?.kycCpf && profile?.kycBirthDate);
+  const showDiditKyc = String(profile?.kycProvider || '') === 'didit';
+  const showManualKyc = profile !== null && !showDiditKyc; // null → nenhum (evita flash)
   useEffect(() => {
-    if (profile?.kycCpf) setJanoCpf(String(profile.kycCpf));
+    if (profile?.kycCpf) setDiditCpf(String(profile.kycCpf));
     if (profile?.kycBirthDate) {
       const d = String(profile.kycBirthDate); // DDMMAAAA
-      if (d.length === 8) setJanoBirth(`${d.slice(4)}-${d.slice(2, 4)}-${d.slice(0, 2)}`);
+      if (d.length === 8) setDiditBirth(`${d.slice(4)}-${d.slice(2, 4)}-${d.slice(0, 2)}`);
     }
   }, [profile?.kycCpf, profile?.kycBirthDate]);
 
-  const startJanoKyc = async () => {
-    const cpf = janoCpf.replace(/\D+/g, '');
-    const rawBirth = janoBirth.includes('-') ? janoBirth.split('-').reverse().join('') : janoBirth.replace(/\D+/g, '');
-    setJanoError('');
+  const startDiditKyc = async () => {
+    const cpf = diditCpf.replace(/\D+/g, '');
+    const rawBirth = diditBirth.includes('-') ? diditBirth.split('-').reverse().join('') : diditBirth.replace(/\D+/g, '');
+    setDiditError('');
     if (cpf.length !== 11 || rawBirth.length !== 8) {
-      setJanoError('Preencha CPF e data de nascimento.');
+      setDiditError('Preencha CPF e data de nascimento.');
       return;
     }
-    setJanoBusy(true);
+    setDiditBusy(true);
     try {
-      const res: any = await motoboyService.startJanoKyc({ cpf, birthDate: rawBirth });
+      const res: any = await motoboyService.startDiditKyc({ cpf, birthDate: rawBirth });
       const payload = res?.data ?? res;
       const url = payload?.captureUrl as string | undefined;
       if (!url) throw new Error(payload?.message || 'Falha ao iniciar verificação.');
@@ -82,9 +87,9 @@ export function MotoboyProfile() {
         }
       }
     } catch (err: any) {
-      setJanoError(err?.response?.data?.message || err?.message || 'Não foi possível iniciar a verificação.');
+      setDiditError(err?.response?.data?.message || err?.message || 'Não foi possível iniciar a verificação.');
     } finally {
-      setJanoBusy(false);
+      setDiditBusy(false);
     }
   };
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
@@ -327,9 +332,10 @@ export function MotoboyProfile() {
     return map;
   }, [documents]);
 
-  // Piloto Jano KYC: documento KYC_JANO criado ao iniciar a verificação hospedada.
-  const janoDoc = documentsByType.get('KYC_JANO');
-  const janoDocStatus = String(janoDoc?.status || '').toUpperCase();
+  // KYC Didit: documento KYC_DIDIT criado ao iniciar a verificação hospedada.
+  const diditDoc = documentsByType.get('KYC_DIDIT');
+  const diditDocStatus = String(diditDoc?.status || '').toUpperCase();
+  const diditReopenSuggested = Boolean((diditDoc?.metadata as any)?.didit?.reopenSuggested);
 
   const shouldPollDocs = useMemo(() => {
     if (!Array.isArray(documents) || documents.length === 0) return false;
@@ -1428,6 +1434,7 @@ export function MotoboyProfile() {
           </button>
         }
       >
+        {showManualKyc ? (
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-slate-200 bg-slate-50 text-slate-700">
             {docsProgress.approved}/{docsProgress.total} completos
@@ -1443,7 +1450,9 @@ export function MotoboyProfile() {
             </span>
           ) : null}
         </div>
-        {/* Piloto Jano KYC — verificação hospedada (documento + selfie + liveness) */}
+        ) : null}
+        {/* KYC Didit — verificação hospedada (documento + selfie + liveness) */}
+        {showDiditKyc ? (
         <div className="rounded-2xl border border-indigo-200 bg-indigo-50/60 text-indigo-950 px-3 py-3 text-sm">
           <div className="flex items-start gap-3">
             <div className="h-10 w-10 rounded-2xl border border-indigo-200 bg-white grid place-items-center shrink-0">
@@ -1451,70 +1460,76 @@ export function MotoboyProfile() {
             </div>
             <div className="min-w-0 flex-1">
               <div className="font-extrabold leading-tight">
-                {janoDocStatus === 'APPROVED'
-                  ? 'Identidade verificada pela Jano'
-                  : janoDocStatus === 'REJECTED'
-                  ? 'Verificação Jano recusada'
+                {diditDocStatus === 'APPROVED'
+                  ? 'Identidade verificada'
+                  : diditDocStatus === 'REJECTED'
+                  ? 'Verificação recusada'
                   : 'Verificação rápida de identidade'}
               </div>
               <div className="text-xs text-slate-700 mt-0.5">
-                {janoDocStatus === 'APPROVED'
-                  ? `Score de confiança: ${Math.round(((janoDoc?.metadata?.face?.score ?? 0) * 1000))}/1000. Cadastro liberado automaticamente.`
-                  : janoDocStatus === 'PENDING' && janoDoc
+                {diditDocStatus === 'APPROVED'
+                  ? diditDoc?.metadata?.face?.score != null
+                    ? `Score de confiança: ${Math.round(((diditDoc?.metadata?.face?.score ?? 0) * 1000))}/1000. Cadastro liberado automaticamente.`
+                    : 'Cadastro liberado automaticamente.'
+                  : diditDocStatus === 'REJECTED'
+                  ? 'Não foi possível validar sua identidade. Inicie a verificação de novo.'
+                  : diditReopenSuggested
+                  ? 'Sua verificação anterior expirou. Inicie de novo para continuar.'
+                  : diditDocStatus === 'PENDING' && diditDoc
                   ? 'Aguardando você concluir a captura — toque em "Já concluí a captura" quando terminar.'
                   : 'Documento + selfie com detecção de vida em 2–3 minutos. Libera o cadastro automaticamente quando aprovado.'}
               </div>
-              {janoDocStatus !== 'APPROVED' ? (
+              {diditDocStatus !== 'APPROVED' ? (
                 <>
-                  {!janoDoc ? (
+                  {!diditDoc || diditReopenSuggested ? (
                     <div className="mt-2 grid gap-2 sm:grid-cols-2">
                       <input
-                        value={janoCpf}
-                        onChange={(e) => setJanoCpf(e.target.value)}
+                        value={diditCpf}
+                        onChange={(e) => setDiditCpf(e.target.value)}
                         placeholder="CPF (somente números)"
                         inputMode="numeric"
-                        disabled={janoBound}
+                        disabled={diditBound}
                         className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
                       />
                       <input
                         type="date"
-                        value={janoBirth}
-                        onChange={(e) => setJanoBirth(e.target.value)}
-                        disabled={janoBound}
+                        value={diditBirth}
+                        onChange={(e) => setDiditBirth(e.target.value)}
+                        disabled={diditBound}
                         className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-500"
                       />
                     </div>
                   ) : null}
-                  {janoError ? <div className="text-xs text-rose-700 mt-1">{janoError}</div> : null}
+                  {diditError ? <div className="text-xs text-rose-700 mt-1">{diditError}</div> : null}
                   <div className="mt-2 flex flex-wrap gap-2">
-                    {!janoDoc ? (
+                    {!diditDoc || diditReopenSuggested ? (
                       <button
                         type="button"
-                        disabled={janoBusy}
-                        onClick={startJanoKyc}
+                        disabled={diditBusy}
+                        onClick={startDiditKyc}
                         className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-extrabold text-white disabled:opacity-50"
                       >
-                        {janoBusy ? 'Iniciando…' : 'Iniciar verificação'}
+                        {diditBusy ? 'Iniciando…' : diditReopenSuggested ? 'Iniciar verificação de novo' : 'Iniciar verificação'}
                       </button>
                     ) : (
                       <button
                         type="button"
-                        disabled={janoBusy}
+                        disabled={diditBusy}
                         onClick={async () => {
-                          setJanoBusy(true);
-                          setJanoError('');
+                          setDiditBusy(true);
+                          setDiditError('');
                           try {
-                            await motoboyService.checkJanoKyc();
+                            await motoboyService.checkDiditKyc();
                           } catch (err: any) {
-                            setJanoError(err?.response?.data?.message || err?.message || '');
+                            setDiditError(err?.response?.data?.message || err?.message || '');
                           } finally {
-                            setJanoBusy(false);
+                            setDiditBusy(false);
                             refreshDocuments().catch(() => null);
                           }
                         }}
                         className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-extrabold text-white disabled:opacity-50"
                       >
-                        {janoBusy ? 'Verificando…' : 'Já concluí a captura — verificar'}
+                        {diditBusy ? 'Verificando…' : 'Já concluí a captura — verificar'}
                       </button>
                     )}
                   </div>
@@ -1523,7 +1538,8 @@ export function MotoboyProfile() {
             </div>
           </div>
         </div>
-        {faceBanner && (
+        ) : null}
+        {showManualKyc && faceBanner && (
           <div
             className={[
               'rounded-2xl border px-3 py-3 text-sm',
@@ -1549,6 +1565,7 @@ export function MotoboyProfile() {
             </div>
           </div>
         )}
+        {showManualKyc ? (
         <div className="grid gap-3">
 	          {documentTypes.map((doc) => {
 	            const current = documentsByType.get(doc.key);
@@ -1708,7 +1725,8 @@ export function MotoboyProfile() {
             );
           })}
         </div>
-        {(requiredDocStatus.missing.length > 0 || requiredDocStatus.rejected.length > 0) && (
+        ) : null}
+        {showManualKyc && (requiredDocStatus.missing.length > 0 || requiredDocStatus.rejected.length > 0) && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
             {requiredDocStatus.missing.length > 0 ? (
               <div className="font-semibold">Faltando: {requiredDocStatus.missing.join(', ')}.</div>

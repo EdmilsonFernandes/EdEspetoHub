@@ -18,8 +18,7 @@ import { DeliveryBillingCycle } from '../entities/DeliveryBillingCycle';
 import { Order } from '../entities/Order';
 import { SettingsService } from './SettingsService';
 import { StoreRepository } from '../repositories/StoreRepository';
-import { MercadoPagoService } from './MercadoPagoService';
-import { OpenPixService, isOpenPixPlatformPixEnabled, toOpenPixCents } from './OpenPixService';
+import { createPlatformPixCharge } from './PlatformPixService';
 import { logger } from '../utils/logger';
 import { PaymentAuditService } from './PaymentAuditService';
 import { PAYMENT_AUDIT_ENTITY, PAYMENT_AUDIT_FLOW, PAYMENT_AUDIT_STAGE } from '../utils/paymentAudit';
@@ -41,8 +40,6 @@ type BillingConfig = {
 export class DeliveryBillingService {
   private settingsService = new SettingsService();
   private storeRepository = new StoreRepository();
-  private mpService = new MercadoPagoService();
-  private openPixService = new OpenPixService();
   private paymentAuditService = new PaymentAuditService();
   private log = logger.child({ scope: 'DeliveryBillingService' });
 
@@ -168,66 +165,43 @@ private async ensurePayment(cycle: DeliveryBillingCycle) {
     const amount = Number(cycle.totalDue || cycle.subtotal || 0);
     if (amount <= 0) return cycle;
 
-    // WAVE 1 OpenPix: taxa de entrega (sempre token da PLATAFORMA) migra o PIX
-    // pro OpenPix quando habilitado; falha cai pro Mercado Pago (intacto).
-    if (isOpenPixPlatformPixEnabled()) {
-      try {
-        const charge = await this.openPixService.createCharge({
-          correlationID: `delivery_cycle:${cycle.id}`,
-          valueBrlCents: toOpenPixCents(amount),
-          expiresInSec: 30 * 60,
-          comment: `Taxa de entregas - ${store.name}`,
-        });
-        cycle.provider = 'OPENPIX';
-        cycle.providerId = charge.providerId;
-        cycle.paymentLink = null;
-        cycle.qrCodeBase64 = charge.qrCodeImageBase64;
-        cycle.qrCodeText = charge.brCode;
-        if (charge.expiresAt) cycle.expiresAt = charge.expiresAt;
-        const openPixRepo = AppDataSource.getRepository(DeliveryBillingCycle);
-        return openPixRepo.save(cycle);
-      } catch (error) {
-        this.log.warn('OpenPix charge failed for delivery cycle, falling back to Mercado Pago', {
-          cycleId: cycle.id,
-          error,
-        });
-      }
-    }
-
-    const mpPayment = await this.mpService.createPayment({
-      amount,
-      method: 'PIX',
-      description: `Taxa de entregas - ${store.name}`,
-      externalReference: `delivery_cycle:${cycle.id}`,
-      payer: {
-        email: store.owner.email,
-        name: store.owner.fullName || store.name,
-      },
-      auditContext: {
-        flowType: PAYMENT_AUDIT_FLOW.DELIVERY_CYCLE,
-        entityType: PAYMENT_AUDIT_ENTITY.DELIVERY_BILLING_CYCLE,
-        entityId: cycle.id,
-        storeId: cycle.storeId,
+    // PIX de plataforma — cadeia única (30/10): Asaas (≥R$5+CPF) → OpenPix →
+    // MP apenas com reativação administrativa. Ciclo é cobrança da PLATAFORMA
+    // (receita de taxa de entrega), nunca da loja. Falha de todos → ciclo fica
+    // sem QR (cobrança re-tenta na próxima leitura) — sem artefato fake.
+    try {
+      const owner = store.owner as any;
+      const payerCpf = String(
+        String(owner?.documentType || '').toUpperCase() === 'CPF' ? owner?.document || '' : ''
+      ).trim();
+      const charge = await createPlatformPixCharge({
         externalReference: `delivery_cycle:${cycle.id}`,
-        eventStage: PAYMENT_AUDIT_STAGE.PROVIDER_REQUEST,
-      },
-    });
-
-    if (mpPayment) {
-      const rawExpires =
-        'expiresAt' in mpPayment ? (mpPayment as any).expiresAt || null : null;
-      const expiresAt =
-        typeof rawExpires === 'string'
-          ? new Date(rawExpires)
-          : rawExpires && typeof rawExpires === 'object'
-          ? new Date(rawExpires as any)
-          : null;
-      cycle.provider = 'MERCADO_PAGO';
-      cycle.providerId = mpPayment.providerId || null;
-      cycle.paymentLink = mpPayment.paymentLink || null;
-      cycle.qrCodeBase64 = mpPayment.qrCodeBase64 || null;
-      cycle.qrCodeText = mpPayment.qrCodeText || null;
-      cycle.expiresAt = expiresAt;
+        amountBrl: amount,
+        comment: `Taxa de entregas - ${store.name}`,
+        payer: {
+          name: store.owner.fullName || store.name,
+          email: store.owner.email,
+          ...(payerCpf ? { cpfCnpj: payerCpf } : {}),
+        },
+        expiresInSec: 30 * 60,
+        mpAuditContext: {
+          flowType: PAYMENT_AUDIT_FLOW.DELIVERY_CYCLE,
+          entityType: PAYMENT_AUDIT_ENTITY.DELIVERY_BILLING_CYCLE,
+          entityId: cycle.id,
+          storeId: cycle.storeId,
+        },
+      });
+      cycle.provider = charge.provider;
+      cycle.providerId = charge.providerId;
+      cycle.paymentLink = charge.paymentLink;
+      cycle.qrCodeBase64 = charge.qrCodeImageBase64;
+      cycle.qrCodeText = charge.brCode;
+      if (charge.expiresAt) cycle.expiresAt = charge.expiresAt;
+    } catch (error: any) {
+      this.log.warn('Delivery cycle PIX charge failed (all providers)', {
+        cycleId: cycle.id,
+        error: error?.message || String(error),
+      });
     }
 
     const repo = AppDataSource.getRepository(DeliveryBillingCycle);

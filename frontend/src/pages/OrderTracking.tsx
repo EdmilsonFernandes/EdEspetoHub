@@ -2026,16 +2026,16 @@ export function OrderTracking() {
 
           {!loading && !error && order && (
             <div className="space-y-3 sm:space-y-4">
-              <div className={`relative overflow-hidden rounded-[1.6rem] border p-4 shadow-[0_24px_52px_-40px_rgba(51,104,134,0.22)] ring-1 ring-white/80 sm:p-5 ${
+              <div className={`relative overflow-hidden rounded-[1.75rem] border p-5 shadow-xs ${
                 isCancelled
-                  ? 'border-rose-100 bg-[linear-gradient(145deg,#fff6f7,#fff)]'
+                  ? 'border-rose-200/80 bg-rose-50/40'
                   : isReady
-                  ? 'border-emerald-100 bg-[linear-gradient(145deg,#f5fbf7,#ffffff)]'
-                  : 'border-[#d5e3ec] bg-[linear-gradient(145deg,#f8fbfd,#eef5fa_52%,#ffffff_100%)]'
+                  ? 'border-emerald-200/80 bg-emerald-50/25'
+                  : 'border-slate-200/80 bg-white'
               }`}>
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div>
-                    <p className="inline-flex items-center gap-1.5 rounded-full border border-[#cfe0ea]/90 bg-white/90 px-2.5 py-1 text-2xs font-bold uppercase tracking-[0.18em] text-[#2563EB] shadow-[0_12px_22px_-20px_rgba(51,104,134,0.18)]">
+                    <p className="inline-flex items-center gap-1.5 rounded-full border border-[#cfe0ea]/90 bg-white/90 px-2.5 py-1 text-2xs font-bold uppercase tracking-wider text-slate-500">
                         Pedido #{orderDisplayId}
                     </p>
                     <div className="mt-3 flex items-center gap-3 flex-wrap">
@@ -2112,9 +2112,9 @@ export function OrderTracking() {
                     </div>
                     <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
                       {orderQuickFacts.map((fact) => (
-                        <div key={fact.key} className="min-w-0 rounded-[1.15rem] border border-white/80 bg-white/78 px-3 py-2.5 shadow-[0_18px_34px_-30px_rgba(51,104,134,0.24)] ring-1 ring-[#d6e4ed]/60 backdrop-blur">
+                        <div key={fact.key} className="min-w-0 rounded-2xl border border-slate-100 bg-slate-50/80 p-3.5 transition hover:bg-slate-50">
                           <div className="flex items-center gap-2">
-                            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-xl border border-[#d6e4ed] bg-[#f4f9fc] text-[#2563EB]">
+                            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-white border border-slate-200/60 text-[#2563EB] shadow-2xs">
                               {fact.icon}
                             </span>
                             <div className="min-w-0">
@@ -2575,7 +2575,7 @@ export function OrderTracking() {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div
                   id="order-items-section"
-                  className="rounded-3xl border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.98))] p-5 shadow-[0_22px_42px_-34px_rgba(51,104,134,0.18)]"
+                  className="rounded-[1.75rem] border border-slate-200/80 bg-white p-5 shadow-xs"
                 >
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <div>
@@ -2594,7 +2594,7 @@ export function OrderTracking() {
                       const hasDiscount = originalLineTotal !== null && originalLineTotal > lineTotal;
 
                       return (
-                        <div key={item.id || item.productId} className="flex items-start gap-3 rounded-2xl border border-[#dce9f1] bg-white/92 px-3 py-3 shadow-[0_12px_24px_-24px_rgba(51,104,134,0.12)]">
+                        <div key={item.id || item.productId} className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-3.5 transition hover:bg-slate-50">
                         {/* Imagem */}
                         {item.imageUrl || item.image || item.product?.imageUrl ? (
                           <Image
@@ -2702,7 +2702,7 @@ export function OrderTracking() {
                     </span>
                   </div>
                 </div>
-                <div id="order-info-section" className="overflow-hidden rounded-3xl border border-[#d5e3ec] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,251,0.98))] shadow-[0_22px_42px_-34px_rgba(51,104,134,0.18)]">
+                <div id="order-info-section" className="overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white shadow-xs">
                   <button
                     type="button"
                     onClick={() => setServiceDetailsExpanded((current) => !current)}

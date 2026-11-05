@@ -15,6 +15,8 @@ import { AppError } from '../errors/AppError';
 import { env } from '../config/env';
 import { MercadoPagoService } from './MercadoPagoService';
 import { OpenPixService, isOpenPixPlatformPixEnabled, toOpenPixCents } from './OpenPixService';
+import { isMercadoPagoEnabled } from './AsaasService';
+import { createPlatformPixCharge } from './PlatformPixService';
 import { OrderDeliveryRepository } from '../repositories/OrderDeliveryRepository';
 import { OrderRepository } from '../repositories/OrderRepository';
 import { OrderReviewRepository } from '../repositories/OrderReviewRepository';
@@ -188,8 +190,14 @@ private async ensureTipPayment(order: any, review: any) {
     let tipSettlementMode: 'STORE_PAYOUT' | 'DIRECT_MOTOBOY' = 'STORE_PAYOUT';
     let chargeAccessToken: string | undefined;
     let chargeScope: 'motoboy' | 'store' | 'platform' | 'mock' = 'mock';
+    // MP é contingência desativada (30/10): OAuth de loja/motoboy não valem
+    // sem reativação — a gorjeta sai pela cadeia da PLATAFORMA (Asaas→OpenPix)
+    // com repasse posterior (STORE_PAYOUT).
+    const mpEnabled = isMercadoPagoEnabled();
 
-    if (motoboyAccessToken) {
+    if (!mpEnabled) {
+      chargeScope = 'platform';
+    } else if (motoboyAccessToken) {
       chargeAccessToken = motoboyAccessToken;
       chargeScope = 'motoboy';
       tipSettlementMode = 'DIRECT_MOTOBOY';
@@ -198,6 +206,42 @@ private async ensureTipPayment(order: any, review: any) {
       chargeScope = 'store';
     } else if (env.mercadoPago.accessToken) {
       chargeScope = 'platform';
+    }
+
+    if (!mpEnabled && chargeScope === 'platform') {
+      // Cadeia de plataforma (Asaas ≥R$5+CPF → OpenPix): gorjeta cai na conta
+      // da plataforma e o repasse ao motoboy/loja segue o fluxo de payout.
+      const payerCpf = String(
+        String((order as any)?.customerUser?.documentType || '').toUpperCase() === 'CPF'
+          ? (order as any)?.customerUser?.document || ''
+          : ''
+      ).trim();
+      const charge = await createPlatformPixCharge({
+        externalReference,
+        amountBrl: tipAmount,
+        comment: description,
+        payer: {
+          name: payerName,
+          email: payerEmail || undefined,
+          ...(payerCpf ? { cpfCnpj: payerCpf } : {}),
+        },
+        expiresInSec: 5 * 60,
+      });
+      review.tipStatus = 'PENDING';
+      review.tipProvider = charge.provider;
+      review.tipProviderId = charge.providerId;
+      review.tipPaymentLink = null;
+      review.tipQrCodeBase64 = charge.qrCodeImageBase64;
+      review.tipQrCodeText = charge.brCode;
+      review.tipExpiresAt = charge.expiresAt || expiresAt;
+      review.tipPaidAt = null;
+      review.tipSettlementMode = 'STORE_PAYOUT';
+      review.tipPayoutStatus = 'PENDING';
+      review.tipPayoutAt = null;
+      review.tipPayoutProofUrl = null;
+      review.tipPayoutNotes = null;
+      review.tipPayoutByUserId = null;
+      return this.orderReviewRepository.saveReview(review);
     }
 
     if (chargeScope !== 'mock') {

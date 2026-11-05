@@ -61,6 +61,7 @@ type HubFilterBarProps = {
   isNativePlatform: boolean;
   quickFilter: HubQuickFilterKey;
   segmentFilter: string;
+  variant?: 'default' | 'duotone';
   onQuickFilterChange: (filter: HubQuickFilterKey) => void;
   onOpenFilters: () => void;
   onScrollStoresIntoView: () => void;
@@ -70,12 +71,14 @@ export function HubFilterBar({
   isNativePlatform,
   quickFilter,
   segmentFilter,
+  variant = 'default',
   onQuickFilterChange,
   onOpenFilters,
   onScrollStoresIntoView,
 }: HubFilterBarProps) {
   const hiddenFilterCount = (quickFilter === 'favorites' ? 1 : 0) + (segmentFilter !== 'all' ? 1 : 0);
   const primaryOptions = HUB_QUICK_FILTER_OPTIONS.filter((item) => HUB_PRIMARY_QUICK_FILTERS.includes(item.key));
+  const isDuotone = variant === 'duotone';
 
   return (
     <div className={`${isNativePlatform ? 'pt-0.5' : 'pt-1'}`}>
@@ -94,16 +97,18 @@ export function HubFilterBar({
                 onQuickFilterChange(nextFilter);
                 if (nextFilter !== 'all') onScrollStoresIntoView();
               }}
-              className={`jnc-hub-touch inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-[11px] font-black leading-none ${
+              className={`jnc-hub-touch inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-black leading-none transition-all active:scale-95 ${
                 active
-                  ? 'jnc-hub-pill-active'
-                  : 'jnc-hub-pill text-slate-600 hover:text-[#153A4C]'
+                  ? 'bg-[#5FD35A] text-[#153A4C] shadow-[0_4px_14px_rgba(95,211,90,0.4)]'
+                  : isDuotone
+                    ? 'border border-white/25 bg-white/14 text-white backdrop-blur-md hover:bg-white/22'
+                    : 'jnc-hub-pill text-slate-600 hover:text-[#153A4C]'
               }`}
               aria-pressed={active}
               aria-label={filter.label}
               title={filter.label}
             >
-              <Icon size={13} weight={active ? 'fill' : 'duotone'} className="shrink-0" />
+              <Icon size={13} weight={active ? 'fill' : 'duotone'} className={active ? 'text-[#153A4C]' : isDuotone ? 'text-white/80' : 'text-[#2563EB]'} />
               <span>{filter.compactLabel}</span>
             </button>
           );
@@ -111,14 +116,16 @@ export function HubFilterBar({
         <button
           type="button"
           onClick={onOpenFilters}
-          className={`jnc-hub-touch relative inline-flex min-h-10 shrink-0 items-center justify-center gap-1 rounded-full px-3 py-2 text-[11px] font-black leading-none ${
+          className={`jnc-hub-touch relative inline-flex min-h-9 shrink-0 items-center justify-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-black leading-none transition-all active:scale-95 ${
             hiddenFilterCount > 0
-              ? 'border border-[#2563EB]/22 bg-[#E0EBFD]/86 text-[#153A4C] shadow-[0_16px_32px_-26px_rgba(51,104,134,0.34)]'
-              : 'jnc-hub-pill text-slate-600 hover:text-[#153A4C]'
+              ? 'bg-[#5FD35A] text-[#153A4C] shadow-[0_4px_14px_rgba(95,211,90,0.4)]'
+              : isDuotone
+                ? 'border border-white/25 bg-white/14 text-white backdrop-blur-md hover:bg-white/22'
+                : 'jnc-hub-pill text-slate-600 hover:text-[#153A4C]'
           }`}
           aria-label="Abrir filtros"
         >
-          <SlidersHorizontal size={14} weight="bold" />
+          <SlidersHorizontal size={13} weight="bold" className={hiddenFilterCount > 0 ? 'text-[#153A4C]' : isDuotone ? 'text-white/80' : 'text-[#2563EB]'} />
           <span>Filtros</span>
           {hiddenFilterCount > 0 ? (
             <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[#153A4C] px-1 text-2xs font-black text-white ring-2 ring-white">
