@@ -10,6 +10,16 @@ do orchestrator. Produto estável em `gha.2617` (29/08 à noite).
 
 ## Últimos fechados
 
+- 07/11 — **Portal multiperfil `/entrar` — acesso profissional de volta no app**
+  (`2711eaf7`, deployado, AAB v133 pronto). Regressão: rota `/entrar` desmontada
+  em `802747e1` (jun) + quick-switch staff só com sessão salva (`ab52f534`, out)
+  = lojista/motoboy sem porta de entrada no app em aparelho novo. Agora:
+  AccessPortal premium (Cliente destaque + Lojista/Entregador/Condomínio/Turismo,
+  chips de estado por aparelho), "Entrar" anônimo sem sessão cai no portal,
+  cliente logado vê "Acesso profissional" sempre, Minha Conta ganha faixa,
+  ClientAuth link "Ver todos os acessos". junto: teste do
+  OrderTrackingProgressCard consertado ("Agora"→"Status agora", vermelho desde
+  v131). Screenshots: `.ux-audit/access-portal-2026-11-07/`.
 - 30/10 — **Venda por unidade × peso (kg)**: produtos ganham modalidade de venda
   (`products.sale_unit` UNIT|WEIGHT + `weight_min_g`/`weight_step_g`; migration
   20261030_001, default UNIT = nada muda para o existente). Pedido por peso usa
