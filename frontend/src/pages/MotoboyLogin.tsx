@@ -159,6 +159,9 @@ export function MotoboyLogin() {
       await runClientFreshStart({
         maxAgeMs: 8 * 60 * 60 * 1000,
         currentBuildId: APP_BUILD_INFO.buildId,
+        // 07/11: limpar caches/atualizar SW dentro do login derrubava chunks e
+        // recarregava no meio do fluxo (mesmo fix do AdminLogin).
+        skipRuntimeCaches: true,
       });
     } catch {
       // no-op: login must continue even if client cleanup fails

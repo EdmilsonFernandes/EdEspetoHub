@@ -20,7 +20,10 @@ const PILLARS = [
 
 function ProofPanel() {
   return (
-    <aside className="relative flex min-h-64 flex-col justify-between overflow-hidden px-10 py-10 lg:min-h-svh lg:px-14 lg:py-12">
+    // Auditoria 07/11: painel de prova é exclusivo do split-screen desktop —
+    // sem o hidden ele empilhava 16rem de gradiente acima do formulário no
+    // mobile (layout quebrado relatado pelo lojista no app).
+    <aside className="relative hidden flex-col justify-between overflow-hidden px-10 py-10 lg:flex lg:min-h-svh lg:px-14 lg:py-12">
       <GradientBackground />
 
       <div className="relative z-10 flex items-center gap-3.5">

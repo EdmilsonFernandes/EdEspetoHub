@@ -7,6 +7,13 @@ type ClientFreshStartOptions = {
   currentBuildId?: string;
   preserveLocalStorageKeys?: string[];
   preserveSessionStorageKeys?: string[];
+  /**
+   * Pula clearCacheStorage + refreshServiceWorkers. OBRIGATÓRIO dentro de fluxos
+   * de login (admin/motoboy, 07/11): limpar caches/atualizar SW no meio da
+   * autenticação derruba lazy chunks → recovery reload → sessão perdida
+   * ("pede biometria, recarrega e sai"). Higiene de storage segue normal.
+   */
+  skipRuntimeCaches?: boolean;
 };
 
 const PRESERVED_LOCAL_STORAGE_KEYS = new Set([
@@ -111,8 +118,10 @@ export const runClientFreshStart = async (options?: ClientFreshStartOptions) => 
 
   clearNonHttpOnlyCookies();
   clearStorage(options);
-  await clearCacheStorage();
-  await refreshServiceWorkers();
+  if (!options?.skipRuntimeCaches) {
+    await clearCacheStorage();
+    await refreshServiceWorkers();
+  }
 
   try {
     localStorage.setItem(LAST_CACHE_CLEAR_AT_KEY, String(Date.now()));

@@ -2,16 +2,34 @@
   "appName": "Já no Caminho",
   "version": "0.1.10",
   "versionBaseLabel": "v0.1.10",
-  "versionDisplaySuffix": "747eb37f",
-  "versionLabel": "v0.1.10.747eb37f",
-  "versionInternal": "0.1.10+20261107.110241.747eb37f",
-  "buildId": "0.1.10+20261107.110241.747eb37f-20261107.110241-747eb37f",
-  "builtAt": "2026-11-07T11:02:41.729Z",
-  "commitHash": "747eb37fa192657dc06cbc3508fff9ff6d834c28",
-  "shortHash": "747eb37f",
+  "versionDisplaySuffix": "507ef251",
+  "versionLabel": "v0.1.10.507ef251",
+  "versionInternal": "0.1.10+20261107.143456.507ef251",
+  "buildId": "0.1.10+20261107.143456.507ef251-20261107.143456-507ef251",
+  "builtAt": "2026-11-07T14:34:56.860Z",
+  "commitHash": "507ef2513721237e22312bc161616cc1f4cab866",
+  "shortHash": "507ef251",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "507ef2513721237e22312bc161616cc1f4cab866",
+      "shortHash": "507ef251",
+      "dateIso": "2026-11-07T08:29:45-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "docs(state): portal multiperfil /entrar restaurado — acesso profissional de volta (2711eaf7)",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/507ef2513721237e22312bc161616cc1f4cab866"
+    },
+    {
+      "hash": "2711eaf75b3c598ede853b940bb3960efd7a1295",
+      "shortHash": "2711eaf7",
+      "dateIso": "2026-11-07T08:14:49-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(auth): portal multiperfil /entrar — acesso profissional de volta no app",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/2711eaf75b3c598ede853b940bb3960efd7a1295"
+    },
     {
       "hash": "747eb37fa192657dc06cbc3508fff9ff6d834c28",
       "shortHash": "747eb37f",
@@ -263,24 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "docs(photos): cadastro automatizado de fotos — EC Ponto da Fruta (34 produtos, Commons CC)",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/da422e94775aed503f800d67daca8a4f8b6f72ad"
-    },
-    {
-      "hash": "969a0fdd5e9882ff14972bef40f76b7b55c2d36d",
-      "shortHash": "969a0fdd",
-      "dateIso": "2026-10-29T15:42:41-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(reui): pipeline de blocos ReUI — downloader próprio, shims e showcase dev",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/969a0fdd5e9882ff14972bef40f76b7b55c2d36d"
-    },
-    {
-      "hash": "4ebb15c0d0aa8b93f42e68ae94566ad69f39b4b0",
-      "shortHash": "4ebb15c0",
-      "dateIso": "2026-10-29T14:12:27-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "docs(reui): plano JNC v2 — varredura Application/Solutions/Marketing (A1-A7)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4ebb15c0d0aa8b93f42e68ae94566ad69f39b4b0"
     }
   ]
 }

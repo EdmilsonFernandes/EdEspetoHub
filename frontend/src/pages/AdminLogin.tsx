@@ -20,6 +20,33 @@ import { prefetchAdminLandingRoutes, scheduleAdminRoutePrefetch } from '../utils
 
 const ADMIN_REMEMBER_IDENTIFIER_KEY = 'auth:last-admin-identifier';
 const ADMIN_FRESH_START_BUDGET_MS = 350;
+// Safety net anti-reload no login (07/11): sessão gravada + janela de 5min ⇒
+// mount do /admin restaura e segue pro painel (cobriu MFA + enrollment biométrico).
+const ADMIN_LOGIN_IN_FLIGHT_KEY = 'admin:login-in-flight-at';
+const ADMIN_LOGIN_IN_FLIGHT_WINDOW_MS = 5 * 60 * 1000;
+
+const markAdminLoginInFlight = () => {
+  try {
+    sessionStorage.setItem(ADMIN_LOGIN_IN_FLIGHT_KEY, String(Date.now()));
+  } catch {
+    // no-op
+  }
+};
+const clearAdminLoginInFlight = () => {
+  try {
+    sessionStorage.removeItem(ADMIN_LOGIN_IN_FLIGHT_KEY);
+  } catch {
+    // no-op
+  }
+};
+const isAdminLoginInFlight = () => {
+  try {
+    const ts = Number(sessionStorage.getItem(ADMIN_LOGIN_IN_FLIGHT_KEY) || 0);
+    return Number.isFinite(ts) && ts > 0 && Date.now() - ts < ADMIN_LOGIN_IN_FLIGHT_WINDOW_MS;
+  } catch {
+    return false;
+  }
+};
 
 const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 const hasInvalidEmailShape = (value: string) =>
@@ -65,6 +92,24 @@ export function AdminLogin() {
 
   useEffect(() => scheduleAdminRoutePrefetch(), []);
 
+  // Safety net (07/11): login interrompido por reload (SW watchdog, recovery de
+  // chunk etc.) volta direto pro painel usando a sessão já gravada, em vez de
+  // exibir o formulário de novo — era o "recarrega e sai" do lojista.
+  useEffect(() => {
+    if (!isAdminLoginInFlight()) return;
+    try {
+      const raw = localStorage.getItem('adminSession');
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (parsed?.token && parsed?.user) {
+        finishAdminLogin(parsed);
+        return;
+      }
+    } catch {
+      // no-op
+    }
+    clearAdminLoginInFlight();
+  }, []);
+
   useEffect(() => {
     const refreshBiometricAvailability = () => {
       setBiometricAvailable(nativeBiometricService.isSupported() && nativeBiometricService.hasValidStoredAdminEnrollment());
@@ -102,6 +147,7 @@ export function AdminLogin() {
   const finishAdminLogin = (sessionData: any) => {
     const redirectTab = sessionStorage.getItem('admin:redirectTab');
     const redirectSlug = sessionStorage.getItem('admin:redirectSlug');
+    clearAdminLoginInFlight();
 
     nativeBiometricService.syncAdminSession(sessionData);
     setAuth(sessionData);
@@ -274,10 +320,15 @@ export function AdminLogin() {
     const redirectTab = sessionStorage.getItem('admin:redirectTab');
     const redirectSlug = sessionStorage.getItem('admin:redirectSlug');
     prefetchAdminLandingRoutes();
+    // Safety net 07/11: marca login em andamento ANTES de qualquer pausa (prompt
+    // de biometria/MFA). Se um reload escapar no meio, o mount restaura a sessão
+    // e segue direto pro painel em vez de voltar ao formulário ("saiu").
+    markAdminLoginInFlight();
     try {
       const freshStartPromise = runClientFreshStart({
         maxAgeMs: 8 * 60 * 60 * 1000,
         currentBuildId: APP_BUILD_INFO.buildId,
+        skipRuntimeCaches: true,
         preserveLocalStorageKeys: [
           'adminSession',
           ADMIN_REMEMBER_IDENTIFIER_KEY,
