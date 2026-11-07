@@ -10,6 +10,17 @@ do orchestrator. Produto estável em `gha.2617` (29/08 à noite).
 
 ## Últimos fechados
 
+- 07/11 (tarde) — **Fix login lojista mobile** (`ee76d865`/`e33875a2`, deployado, AAB
+  v134). Após o relato do Edmilson testando no app: (1) `/admin` mobile mostrava o
+  painel desktop "Sua gestão de elite" empilhado sobre o form (AdminLoginSplitLayout
+  sem `hidden lg:flex` desde 30/10) — oculto abaixo de lg; (2) "pede biometria,
+  recarrega e sai": `runClientFreshStart` limpava CacheStorage + atualizava SW NO
+  MEIO do login → chunk fail → recovery reload → sessão perdida no prompt. Fix:
+  `skipRuntimeCaches` no freshStart dos logins staff + safety net `admin:login-in-flight`
+  (5min) que restaura sessão e segue pro painel se qualquer reload escapar.
+  **Validação real em prod**: fluxo completo /entrar→Lojista→login→dashboard OK,
+  0 reload, 0 erros, adminSession persistida (evidências em
+  `.ux-audit/access-portal-2026-11-07/flow-*.png`).
 - 07/11 — **Portal multiperfil `/entrar` — acesso profissional de volta no app**
   (`2711eaf7`, deployado, AAB v133 pronto). Regressão: rota `/entrar` desmontada
   em `802747e1` (jun) + quick-switch staff só com sessão salva (`ab52f534`, out)
