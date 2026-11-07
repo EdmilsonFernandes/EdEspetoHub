@@ -6,7 +6,7 @@ import { authService } from '../services/authService';
 import { getPersistedBranding } from '../constants';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { AdminLoginSplitLayout } from '../components/Auth/AdminLoginSplitLayout';
+import { AuthLayout } from '../layouts/AuthLayout';
 import { runClientFreshStart } from '../utils/clientFreshStart';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
 import { ArrowLeft, Check, Eye, EyeSlash, LockKey, ShieldCheck, WarningCircle } from '@phosphor-icons/react';
@@ -624,8 +624,17 @@ export function AdminLogin() {
   }, [searchParams]);
 
   return (
-    <AdminLoginSplitLayout
+    // Mesmo layout das outras telas de acesso (/cliente, /motoboy/login,
+    // /condominio/login): header glass mobile com safe-areas do app nativo,
+    // split com painel de marca no desktop. Igualar ao AuthLayout corrigiu o
+    // "não encaixa no celular" (07/11) — a pele split anterior era desktop-only
+    // encolhida, sem altura total nem áreas seguras.
+    <AuthLayout
+      title={hubMode ? 'Acesso da loja' : 'Área do Lojista'}
+      eyebrow="Já no Caminho"
+      subtitle="Operação da loja"
       backTo={hubMode ? '/hub' : accessPortalPath}
+      showHeader
     >
       <div className="space-y-1.5 ds-login-card-enter w-full sm:space-y-4">
         <div className="hidden text-center sm:block">
@@ -931,7 +940,7 @@ export function AdminLogin() {
         }}
         onVerify={handleMfaVerify}
       />
-    </AdminLoginSplitLayout>
+    </AuthLayout>
   );
 
 }

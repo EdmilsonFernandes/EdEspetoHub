@@ -2,16 +2,43 @@
   "appName": "Já no Caminho",
   "version": "0.1.10",
   "versionBaseLabel": "v0.1.10",
-  "versionDisplaySuffix": "507ef251",
-  "versionLabel": "v0.1.10.507ef251",
-  "versionInternal": "0.1.10+20261107.143456.507ef251",
-  "buildId": "0.1.10+20261107.143456.507ef251-20261107.143456-507ef251",
-  "builtAt": "2026-11-07T14:34:56.860Z",
-  "commitHash": "507ef2513721237e22312bc161616cc1f4cab866",
-  "shortHash": "507ef251",
+  "versionDisplaySuffix": "3b0a04e6",
+  "versionLabel": "v0.1.10.3b0a04e6",
+  "versionInternal": "0.1.10+20261107.185705.3b0a04e6",
+  "buildId": "0.1.10+20261107.185705.3b0a04e6-20261107.185705-3b0a04e6",
+  "builtAt": "2026-11-07T18:57:05.207Z",
+  "commitHash": "3b0a04e6888630c5a41cdd78557191632c27da4d",
+  "shortHash": "3b0a04e6",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "3b0a04e6888630c5a41cdd78557191632c27da4d",
+      "shortHash": "3b0a04e6",
+      "dateIso": "2026-11-07T12:12:16-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "docs(state): fix login lojista mobile — validação real em produção",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3b0a04e6888630c5a41cdd78557191632c27da4d"
+    },
+    {
+      "hash": "e33875a2c442b03d3585214e64db613ba345095e",
+      "shortHash": "e33875a2",
+      "dateIso": "2026-11-07T12:10:54-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(mobile): versionCode 134 — AAB com portal multiperfil + fix login lojista mobile",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/e33875a2c442b03d3585214e64db613ba345095e"
+    },
+    {
+      "hash": "ee76d865ddaa5f12c394fed5083524cbf26d451b",
+      "shortHash": "ee76d865",
+      "dateIso": "2026-11-07T11:56:42-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(auth): login lojista mobile — painel desktop oculto + fim do reload que derrubava a sessão",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/ee76d865ddaa5f12c394fed5083524cbf26d451b"
+    },
     {
       "hash": "507ef2513721237e22312bc161616cc1f4cab866",
       "shortHash": "507ef251",
@@ -254,33 +281,6 @@
       "authorEmail": "edmls2008@gmail.com",
       "subject": "feat(admin-v2): painel do lojista V2 completo em /admin/dashboardV2",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/56efd41806980d4fdfafc3ab58238c58c637ce41"
-    },
-    {
-      "hash": "3d438c38de0184410b455c19f455fcd424e4a5e1",
-      "shortHash": "3d438c38",
-      "dateIso": "2026-10-30T21:11:53-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "fix(ui): sidebar shadcn compativel com Tailwind 4 + tokens do shell V2",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/3d438c38de0184410b455c19f455fcd424e4a5e1"
-    },
-    {
-      "hash": "8a9e088a435f0d69aa19f42e7b97a1bb4b4c438e",
-      "shortHash": "8a9e088a",
-      "dateIso": "2026-10-30T17:16:23-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(tooling): kit reutilizável de cadastro de fotos de produtos por loja",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/8a9e088a435f0d69aa19f42e7b97a1bb4b4c438e"
-    },
-    {
-      "hash": "da422e94775aed503f800d67daca8a4f8b6f72ad",
-      "shortHash": "da422e94",
-      "dateIso": "2026-10-30T16:07:30-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "docs(photos): cadastro automatizado de fotos — EC Ponto da Fruta (34 produtos, Commons CC)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/da422e94775aed503f800d67daca8a4f8b6f72ad"
     }
   ]
 }
