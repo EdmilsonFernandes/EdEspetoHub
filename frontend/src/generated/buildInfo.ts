@@ -5,16 +5,34 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.10",
   "versionBaseLabel": "v0.1.10",
-  "versionDisplaySuffix": "f38a9b46",
-  "versionLabel": "v0.1.10.f38a9b46",
-  "versionInternal": "0.1.10+20261105.214212.f38a9b46",
-  "buildId": "0.1.10+20261105.214212.f38a9b46-20261105.214212-f38a9b46",
-  "builtAt": "2026-11-05T21:42:12.244Z",
-  "commitHash": "f38a9b46b5f8f986da4a0e25f390ff19c2a32129",
-  "shortHash": "f38a9b46",
+  "versionDisplaySuffix": "747eb37f",
+  "versionLabel": "v0.1.10.747eb37f",
+  "versionInternal": "0.1.10+20261107.110241.747eb37f",
+  "buildId": "0.1.10+20261107.110241.747eb37f-20261107.110241-747eb37f",
+  "builtAt": "2026-11-07T11:02:41.729Z",
+  "commitHash": "747eb37fa192657dc06cbc3508fff9ff6d834c28",
+  "shortHash": "747eb37f",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "747eb37fa192657dc06cbc3508fff9ff6d834c28",
+      "shortHash": "747eb37f",
+      "dateIso": "2026-11-06T09:14:33-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "chore(mobile): bump version to 132 (1.0.132) com sync de assets e bundle ReUI",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/747eb37fa192657dc06cbc3508fff9ff6d834c28"
+    },
+    {
+      "hash": "223cb0b1e1a52c00eb6c4f4d1930f750ceb64dde",
+      "shortHash": "223cb0b1",
+      "dateIso": "2026-11-05T18:51:45-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "feat(ui): redesign premium ReUI Glassmorphism, correcao de contexto de chale, remocao de azul generico e normalizacao de perfil",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/223cb0b1e1a52c00eb6c4f4d1930f750ceb64dde"
+    },
     {
       "hash": "f38a9b46b5f8f986da4a0e25f390ff19c2a32129",
       "shortHash": "f38a9b46",
@@ -266,24 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "docs(reui): plano JNC v2 — varredura Application/Solutions/Marketing (A1-A7)",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/4ebb15c0d0aa8b93f42e68ae94566ad69f39b4b0"
-    },
-    {
-      "hash": "52caeb6e55130cc3224dce28bd5d51922f0399f1",
-      "shortHash": "52caeb6e",
-      "dateIso": "2026-10-19T19:46:58-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(payments): CPF do cliente na Conta — Asaas PIX viável no checkout",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/52caeb6e55130cc3224dce28bd5d51922f0399f1"
-    },
-    {
-      "hash": "11569cf3bf193c3c8f90a6a6f36ecb45761fdde2",
-      "shortHash": "11569cf3",
-      "dateIso": "2026-10-19T16:05:22-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "docs(state): atualiza lacunas do benchmark — som entregue, deliveryCode já existe no backend (falta expor ao cliente)",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/11569cf3bf193c3c8f90a6a6f36ecb45761fdde2"
     }
   ]
 } as const;

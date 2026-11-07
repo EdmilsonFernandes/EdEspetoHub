@@ -544,9 +544,19 @@ export function ProfileDrawer({
                   </div>
                 </div>
               </div>
-              {hasStaffSession && (<button
+              {(activeContext === 'client' || hasStaffSession) && (<button
                 type="button"
-                onClick={() => { setAccessPickerMode('login'); setHighlightFirstAccess(false); setAccessPickerOpen(true); }}
+                onClick={() => {
+                  if (hasStaffSession) {
+                    setAccessPickerMode('login');
+                    setHighlightFirstAccess(false);
+                    setAccessPickerOpen(true);
+                  } else {
+                    // Sem sessão staff neste aparelho: portal multiperfil completo.
+                    onClose();
+                    drawerNavigate('/entrar?next=/hub&hub=1');
+                  }
+                }}
                 className="group flex w-full items-center gap-3 rounded-[1.3rem] border border-[#C3D8FB]/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(243,248,251,0.96)_100%)] px-3.5 py-3 text-left shadow-[0_14px_30px_-26px_rgba(21,58,76,0.28)] transition-all active:scale-[0.98]"
               >
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-white bg-white text-[#153A4C] shadow-[0_12px_24px_-20px_rgba(21,58,76,0.36)]">
@@ -558,7 +568,9 @@ export function ProfileDrawer({
                   </span>
                   <span className="mt-0.5 block text-[10.5px] font-semibold leading-4 text-slate-500">
                     {activeContext === 'client'
-                      ? 'Operação da loja ou entregas neste aparelho'
+                      ? hasStaffSession
+                        ? 'Operação da loja ou entregas neste aparelho'
+                        : 'Lojista, entregador, condomínio ou parceiro'
                       : 'Cliente ou outro perfil salvo aqui'}
                   </span>
                 </span>
@@ -610,7 +622,11 @@ export function ProfileDrawer({
                 </button>
               </div>
 
-              {/* Arquitetura de identidade (04/10, estudo SouFix): o app do cliente é SÓ do cliente. Acessos profissionais (lojista/entregador) têm destinos próprios (/admin, painel do motoboy, landing) e não são oferecidos ao anônimo aqui. Quick-switch só com sessão salva — ver botão condicional na seção logada. */}
+              {/* Arquitetura de identidade (04/10, estudo SouFix; evoluída 07/11): o fluxo do
+                  cliente continua limpo, mas "Entrar" sem sessão agora abre o portal multiperfil
+                  /entrar (Cliente em destaque + Lojista/Entregador/Condomínio/Turismo) — antes o
+                  anônimo não tinha porta de entrada profissional neste app. Quick-switch de sessão
+                  staff salva segue no bloco logado acima. */}
             </div>
           )}
         </div>

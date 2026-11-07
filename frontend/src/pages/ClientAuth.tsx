@@ -748,6 +748,17 @@ export function ClientAuth() {
                 ) : null}
               </div>
             ) : null}
+            {mode === 'login' ? (
+              <button
+                type="button"
+                onClick={() => navigate('/entrar?next=/hub&hub=1')}
+                className="flex min-h-10 w-full items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white/70 px-4 py-2.5 text-[11.5px] font-bold text-slate-500 transition-colors hover:border-[#2563EB]/25 hover:text-[#153A4C]"
+              >
+                É lojista, entregador, condomínio ou parceiro?
+                <span className="font-black text-[#1E40AF]">Ver todos os acessos</span>
+                <span aria-hidden>→</span>
+              </button>
+            ) : null}
             <AuthMascotPanel variant="client" mode={mode} />
           </form>
 

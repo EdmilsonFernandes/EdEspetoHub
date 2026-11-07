@@ -76,6 +76,7 @@ const EmpresaJanoCaminhoPage = lazyPage(() => import('./pages/EmpresaJanoCaminho
 const LandingPage = lazyPage(() => import('./pages/LandingPage'), 'LandingPage');
 const PartnersPage = lazyPage(() => import('./pages/PartnersPage'), 'PartnersPage');
 const CreateStore = lazyPage(() => import('./pages/CreateStore'), 'CreateStore');
+const AccessPortal = lazyPage(() => import('./pages/AccessPortal'), 'AccessPortal');
 const StorePage = lazyPage(loadStorePage, 'StorePage');
 const OrdersQueue = lazyPage(() => import('./pages/OrdersQueue'), 'OrdersQueue');
 const AdminDashboard = lazyPage(loadAdminDashboardPage, 'AdminDashboard');
@@ -239,8 +240,11 @@ function App() {
               <Route path="/guia" element={<SystemGuidePage />} />
               <Route path="/docs" element={<Navigate to="/guia" replace />} />
               <Route path="/create" element={<CreateStore />} />
-              <Route path="/entrar" element={<Navigate to="/cliente?mode=login" replace />} />
-              <Route path="/login" element={<Navigate to="/cliente?mode=login" replace />} />
+              {/* /entrar — portal multiperfil (Cliente · Lojista · Entregador · Condomínio · Turismo).
+                  Restaurado 07/11: desmontado desde jun/2026, o app ficou sem porta de entrada
+                  profissional para aparelhos sem sessão staff salva (quick-switch 04/10). */}
+              <Route path="/entrar" element={<AccessPortal />} />
+              <Route path="/login" element={<AccessPortal />} />
               <Route path="/cliente" element={<ClientAuth />} />
               <Route path="/cliente/login" element={<Navigate to="/cliente?mode=login" replace />} />
               <Route path="/cliente/cadastro" element={<Navigate to="/cliente?mode=register" replace />} />

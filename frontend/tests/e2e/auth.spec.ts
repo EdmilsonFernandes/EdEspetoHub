@@ -86,13 +86,18 @@ test.describe('Suíte E2E: Auth e Acesso', () => {
       .toBe(true);
   });
 
-  test('rota entrar nao abre seletor de perfis e cai direto no cliente', async ({ page }) => {
+  test('rota entrar abre o portal multiperfil com todos os acessos', async ({ page }) => {
     await page.goto('/entrar');
     await waitForAppIntro(page);
 
-    await expect(page).toHaveURL(/\/cliente\?mode=login/);
-    await expect(page.getByRole('banner')).toContainText('Área do cliente');
-    await expect(page.getByText('Escolha como deseja entrar')).toHaveCount(0);
+    // Portal restaurado (07/11): cliente em destaque + perfis profissionais visíveis.
+    await expect(page).toHaveURL(/\/entrar/);
+    await expect(page.getByRole('heading', { name: 'Como você quer entrar?' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Entrar como cliente' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Entrar como Lojista' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Entrar como Entregador' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Entrar como Condomínio' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Entrar como Turismo & Parceiros' })).toBeVisible();
   });
 
   test('mostra header padrao e valida login do cliente sem envio silencioso', async ({ page }) => {

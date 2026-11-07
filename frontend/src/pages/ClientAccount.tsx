@@ -16,6 +16,7 @@ import {
   CheckCircle,
   XCircle,
   BellSimpleRinging,
+  Briefcase,
   Trash
 } from '@phosphor-icons/react';
 import { customerAccountService } from '../services/customerAccountService';
@@ -901,6 +902,25 @@ export function ClientAccount() {
                     );
                   })}
                 </div>
+
+                {/* Acesso profissional — portal multiperfil /entrar (07/11): quem tem loja,
+                    entrega, condomínio ou turismo entra por aqui sem sair da conta de cliente. */}
+                <button
+                  type="button"
+                  onClick={() => navigate('/entrar?next=/hub&hub=1')}
+                  className="group relative mt-3 flex w-full items-center gap-3.5 rounded-[1.65rem] border border-[#C3D8FB]/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(240,246,251,0.95)_100%)] p-3.5 text-left shadow-[0_18px_38px_-32px_rgba(21,58,76,0.35)] transition hover:border-[#2563EB]/30 active:scale-[0.99]"
+                >
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-white bg-white text-[#153A4C] shadow-[0_12px_24px_-20px_rgba(21,58,76,0.4)]">
+                    <Briefcase size={20} weight="duotone" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[13.5px] font-black text-slate-900">Área profissional</span>
+                    <span className="mt-0.5 block text-[11px] font-semibold leading-4 text-slate-500">
+                      Lojista, entregador, condomínio ou turismo — cada acesso na sua área
+                    </span>
+                  </span>
+                  <CaretRight size={15} weight="bold" className="shrink-0 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-slate-600" />
+                </button>
 
                 {profileEditing ? (
                   <div className="relative mt-7 space-y-3 rounded-[1.8rem] border border-slate-200/80 bg-white/82 p-4 shadow-[0_18px_38px_-32px_rgba(15,23,42,0.24)]">

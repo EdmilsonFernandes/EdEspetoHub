@@ -21,7 +21,9 @@ describe('OrderTrackingProgressCard', () => {
       />
     );
 
-    expect(screen.getByText('Agora')).toBeInTheDocument();
+    // ReUI redesign (f38a9b46): eyebrow do status atual passou de "Agora" para "Status agora".
+    expect(screen.getByText('Status agora')).toBeInTheDocument();
+    expect(screen.getByText('Em preparação')).toBeInTheDocument();
     expect(screen.getByText('Próximo passo')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /ver andamento completo/i })).toHaveAttribute('aria-expanded', 'false');
     expect(screen.queryByText('Pedido recebido')).not.toBeInTheDocument();

@@ -1768,7 +1768,9 @@ export function MarketplacePage() {
         // fallback to login screen
       }
     }
-    navigate('/cliente?mode=login&next=/hub&hub=1&bio=1');
+    // Sem sessão/biometria salva: portal multiperfil (/entrar) — cliente em
+    // destaque, lojista/entregador/condomínio/turismo acessíveis (07/11).
+    navigate('/entrar?next=/hub&hub=1');
   }, [navigate]);
 
   const openAdminLogin = useCallback(async () => {
