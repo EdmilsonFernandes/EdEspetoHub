@@ -25,8 +25,8 @@ export function AuthLayout({
 }: AuthLayoutProps) {
   const isNativePlatform = Capacitor.isNativePlatform();
   const spacingClass = showHeader
-    ? 'pb-[calc(env(safe-area-inset-bottom)+0.65rem)] pt-[calc(env(safe-area-inset-top)+3.7rem)] sm:pb-10 sm:pt-[calc(env(safe-area-inset-top)+5.6rem)]'
-    : 'py-3 sm:py-10';
+    ? 'pb-[max(6rem,calc(env(safe-area-inset-bottom)+4.5rem))] pt-[calc(env(safe-area-inset-top)+4.2rem)] sm:pb-12 sm:pt-[calc(env(safe-area-inset-top)+5.6rem)]'
+    : 'py-4 pb-[max(5rem,calc(env(safe-area-inset-bottom)+3rem))] sm:py-10';
   const shellMinHeightClass = showHeader
     ? 'min-h-[calc(100dvh-4.35rem)] sm:min-h-[calc(100vh-8.1rem)] lg:min-h-[calc(100vh-3rem)]'
     : 'min-h-[calc(100dvh-1.5rem)] sm:min-h-[calc(100vh-3rem)]';

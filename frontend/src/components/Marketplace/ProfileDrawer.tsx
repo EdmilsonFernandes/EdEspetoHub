@@ -25,7 +25,6 @@ import {
   MOTOBOY_SESSION_EVENT,
   nativeBiometricService,
 } from '../../services/nativeBiometricService';
-import { SmartDrawerScrollArea } from '../common/SmartDrawerScrollArea';
 
 type DrawerAction = {
   id: string;
@@ -313,12 +312,12 @@ export function ProfileDrawer({
   const currentIdentity =
     activeContext === 'client'
       ? {
-          eyebrow: 'Minha conta',
-          title: String(userName || savedAccessProfiles.customer.name || 'Cliente').trim() || 'Cliente',
+          eyebrow: 'Sua conta',
+          title: String(userName || savedAccessProfiles.customer.name || 'Minha Conta').trim() || 'Minha Conta',
           email: String(userEmail || savedAccessProfiles.customer.email || '').trim(),
           imageUrl: profileImageUrl || null,
           icon: <UserCircle size={36} weight="duotone" />,
-          iconShell: 'rounded-2xl bg-gradient-to-br from-white to-slate-100 text-slate-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_32px_-24px_rgba(15,23,42,0.35)] ring-1 ring-slate-100',
+          iconShell: 'rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_32px_-24px_rgba(14,75,62,0.35)] ring-1 ring-emerald-100',
           badges: [
             { label: 'Conectado', tone: 'success' as const },
           ],
@@ -356,18 +355,18 @@ export function ProfileDrawer({
           : null;
 
   const clientActions: DrawerAction[] = [
-    { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-[#2563EB]', bgColor: 'bg-[#2563EB]/10' },
-    { id: 'orders', label: 'Meus pedidos', icon: <Receipt size={22} weight="duotone" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-[#2563EB]', bgColor: 'bg-[#2563EB]/10' },
+    { id: 'account', label: 'Minha Conta', icon: <UserRectangle size={22} weight="duotone" />, onClick: onOpenAccount, iconColor: 'text-[#0E4B3E]', bgColor: 'bg-emerald-50' },
+    { id: 'orders', label: 'Meus pedidos', icon: <Receipt size={22} weight="duotone" />, onClick: onOpenOrders || onOpenAccount, iconColor: 'text-emerald-700', bgColor: 'bg-emerald-50' },
     { id: 'notifications', label: 'Notificações', icon: <BellRinging size={22} weight="duotone" />, onClick: () => { drawerNavigate('/notificacoes'); }, iconColor: 'text-amber-600', bgColor: 'bg-amber-50', badge: notifBadge },
-    { id: 'settings', label: 'Configurações', icon: <GearSix size={22} weight="duotone" />, onClick: onOpenSettings, iconColor: 'text-violet-600', bgColor: 'bg-violet-50' },
-    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#2563EB]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
-    { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#2563EB]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
-    { id: 'logout', label: 'Sair', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
+    { id: 'settings', label: 'Configurações', icon: <GearSix size={22} weight="duotone" />, onClick: onOpenSettings, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+    { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-emerald-800', bgColor: 'bg-emerald-50' },
+    { id: 'logout', label: 'Sair da conta', icon: <SignOut size={22} weight="duotone" />, onClick: onLogout, tone: 'danger' },
   ];
   const storeActions: DrawerAction[] = [
-    { id: 'store-panel', label: 'Operação da loja', icon: <CookingPot size={22} weight="duotone" />, onClick: onOpenAdminLogin, iconColor: 'text-[#2563EB]', bgColor: 'bg-[#2563EB]/10' },
-    { id: 'help-store', label: 'Ajuda operacional', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#2563EB]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
-    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#2563EB]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'store-panel', label: 'Operação da loja', icon: <CookingPot size={22} weight="duotone" />, onClick: onOpenAdminLogin, iconColor: 'text-violet-700', bgColor: 'bg-violet-50' },
+    { id: 'help-store', label: 'Ajuda operacional', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
     { id: 'logout-store', label: 'Sair', icon: <SignOut size={22} weight="duotone" />, onClick: onLogoutAdmin || (() => undefined), tone: 'danger' },
   ];
   if (storeSlug) {
@@ -383,14 +382,14 @@ export function ProfileDrawer({
     });
   }
   const motoboyActions: DrawerAction[] = [
-    { id: 'motoboy-panel', label: 'Painel de entregas', icon: <Motorcycle size={22} weight="duotone" />, onClick: onOpenMotoboyLogin, iconColor: 'text-slate-700', bgColor: 'bg-slate-100' },
-    { id: 'help-motoboy', label: 'Ajuda do entregador', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#2563EB]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
-    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#2563EB]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'motoboy-panel', label: 'Painel de entregas', icon: <Motorcycle size={22} weight="duotone" />, onClick: onOpenMotoboyLogin, iconColor: 'text-amber-700', bgColor: 'bg-amber-50' },
+    { id: 'help-motoboy', label: 'Ajuda do entregador', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
+    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
     { id: 'logout-motoboy', label: 'Sair', icon: <SignOut size={22} weight="duotone" />, onClick: onLogoutMotoboy || (() => undefined), tone: 'danger' },
   ];
   const guestActions: DrawerAction[] = [
-    { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#2563EB]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
-    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-[#2563EB]', bgColor: 'bg-[linear-gradient(135deg,rgba(239,246,255,1),rgba(236,253,245,0.9))]' },
+    { id: 'help', label: 'Ajuda e Atendimento', icon: <Headset size={24} weight="duotone" />, onClick: onOpenHelp, iconColor: 'text-[#0E4B3E]', bgColor: 'bg-emerald-50' },
+    { id: 'legal', label: 'Termos, Privacidade e Segurança', icon: <ShieldCheckered size={24} weight="duotone" />, onClick: onOpenTerms, iconColor: 'text-slate-600', bgColor: 'bg-slate-100' },
   ];
   const actions: DrawerAction[] =
     activeContext === 'client'
@@ -400,14 +399,6 @@ export function ProfileDrawer({
         : activeContext === 'motoboy'
           ? motoboyActions
           : guestActions;
-  const drawerScrollTone =
-    activeContext === 'store'
-      ? 'store'
-      : activeContext === 'motoboy'
-        ? 'motoboy'
-        : activeContext === 'client'
-          ? 'client'
-          : 'neutral';
 
   const getAccessCardClasses = (item: AccessProfile) => {
     if (item.current) {
@@ -481,27 +472,27 @@ export function ProfileDrawer({
       <div className="absolute inset-0 bg-slate-950/45 backdrop-blur-md" onClick={onClose} />
 
       <aside
-        className={`absolute inset-y-0 left-0 w-[300px] max-w-[85vw] transform border-r border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(248,250,252,0.98)_100%)] shadow-[0_30px_70px_-35px_rgba(15,23,42,0.45)] backdrop-blur-2xl transition-transform duration-500 ease-out ${
+        className={`absolute inset-y-0 left-0 w-[335px] sm:w-[385px] max-w-[88vw] transform border-r border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.98)_100%)] shadow-[0_30px_70px_-35px_rgba(15,23,42,0.45)] backdrop-blur-2xl transition-transform duration-500 ease-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } flex flex-col pt-[env(safe-area-inset-top)]`}
       >
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -left-12 top-8 h-28 w-28 rounded-full bg-[#2563EB]/12 blur-3xl" />
-          <div className="absolute right-0 top-24 h-36 w-36 rounded-full bg-sky-100/60 blur-3xl" />
+          <div className="absolute -left-12 top-8 h-28 w-28 rounded-full bg-emerald-500/10 blur-3xl" />
+          <div className="absolute right-0 top-24 h-36 w-36 rounded-full bg-teal-100/50 blur-3xl" />
         </div>
-        <div className="border-b border-slate-100/80 bg-white/50 p-6 pb-4">
+        <div className="border-b border-slate-100/80 bg-white/50 p-5 pb-4">
           {hasActiveContext && currentIdentity ? (
             <div className="space-y-4">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3.5">
                 {currentIdentity.imageUrl ? (
-                  <div className="relative">
+                  <div className="relative shrink-0">
                     <img
                       src={currentIdentity.imageUrl}
                       alt={currentIdentity.title}
                       loading="eager"
                       fetchPriority="high"
                       decoding="async"
-                      className="h-16 w-16 rounded-2xl border-2 border-white object-cover shadow-[0_18px_30px_-18px_rgba(51,104,134,0.45)] ring-2 ring-[#2563EB]/15"
+                      className="h-14 w-14 rounded-2xl border-2 border-white object-cover shadow-[0_18px_30px_-18px_rgba(14,75,62,0.45)] ring-2 ring-emerald-600/15"
                     />
                     <span className="absolute -bottom-1 -right-1 flex h-4 w-4">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -509,8 +500,8 @@ export function ProfileDrawer({
                     </span>
                   </div>
                 ) : (
-                  <div className="relative">
-                    <div className={`grid h-16 w-16 place-items-center ${currentIdentity.iconShell}`}>
+                  <div className="relative shrink-0">
+                    <div className={`grid h-14 w-14 place-items-center ${currentIdentity.iconShell}`}>
                       {currentIdentity.icon}
                     </div>
                     <span className="absolute -bottom-1 -right-1 flex h-4 w-4">
@@ -520,22 +511,18 @@ export function ProfileDrawer({
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-[#2563EB]/80">{currentIdentity.eyebrow}</p>
-                  <p className="mt-1 truncate text-base font-black leading-tight text-slate-950">{currentIdentity.title}</p>
-                  <p className="mt-0.5 truncate text-xs font-bold text-slate-500">{currentIdentity.email || 'Acesso salvo neste aparelho'}</p>
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <p className="truncate text-[10.5px] font-black uppercase tracking-[0.16em] text-emerald-800/80">{currentIdentity.eyebrow}</p>
+                  <p className="mt-0.5 text-base font-black leading-snug text-slate-950 line-clamp-1" title={currentIdentity.title}>
+                    {activeContext === 'client' && currentIdentity.title !== 'Cliente' && currentIdentity.title !== 'Minha Conta'
+                      ? `Olá, ${currentIdentity.title.split(' ')[0]} 👋`
+                      : currentIdentity.title}
+                  </p>
+                  <p className="mt-0.5 truncate text-xs font-semibold text-slate-500">{currentIdentity.email || 'Acesso ativo no dispositivo'}</p>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                     {currentIdentity.badges.map((badge) => (
                       <span
                         key={badge.label}
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] ${
-                          badge.tone === 'success'
-                            ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
-                            : badge.tone === 'brand'
-                              ? 'border border-[#d8e5ee] bg-[#E0EBFD] text-[#2563EB]'
-                            : (badge.tone as string) === 'dark'
-                                ? 'border border-slate-200 bg-slate-900 text-white'
-                                : 'border border-slate-200 bg-white/90 text-slate-500'
-                        }`}
+                        className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50/80 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-emerald-700"
                       >
                         <CheckCircle size={10} weight="fill" />
                         {badge.label}
@@ -552,38 +539,37 @@ export function ProfileDrawer({
                     setHighlightFirstAccess(false);
                     setAccessPickerOpen(true);
                   } else {
-                    // Sem sessão staff neste aparelho: portal multiperfil completo.
                     onClose();
                     drawerNavigate('/entrar?next=/hub&hub=1');
                   }
                 }}
-                className="group flex w-full items-center gap-3 rounded-[1.3rem] border border-[#C3D8FB]/80 bg-[linear-gradient(145deg,rgba(255,255,255,0.98)_0%,rgba(243,248,251,0.96)_100%)] px-3.5 py-3 text-left shadow-[0_14px_30px_-26px_rgba(21,58,76,0.28)] transition-all active:scale-[0.98]"
+                className="group flex w-full items-center gap-3 rounded-[1.2rem] border border-slate-200/90 bg-slate-50/80 px-3.5 py-2.5 text-left shadow-2xs transition-all hover:bg-white active:scale-[0.98]"
               >
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-white bg-white text-[#153A4C] shadow-[0_12px_24px_-20px_rgba(21,58,76,0.36)]">
-                  <Briefcase size={19} weight="duotone" />
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white bg-white text-[#0E4B3E] shadow-2xs">
+                  <Briefcase size={18} weight="duotone" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[12px] font-black uppercase tracking-[0.1em] text-[#153A4C]">
+                  <span className="block text-[11.5px] font-black uppercase tracking-[0.08em] text-slate-900">
                     {activeContext === 'client' ? 'Acesso profissional' : 'Trocar de perfil'}
                   </span>
-                  <span className="mt-0.5 block text-[10.5px] font-semibold leading-4 text-slate-500">
+                  <span className="mt-0.5 block truncate text-[10px] font-semibold text-slate-500">
                     {activeContext === 'client'
                       ? hasStaffSession
-                        ? 'Operação da loja ou entregas neste aparelho'
+                        ? 'Operação da loja ou entregas'
                         : 'Lojista, entregador, condomínio ou parceiro'
-                      : 'Cliente ou outro perfil salvo aqui'}
+                      : 'Cliente ou outro perfil salvo'}
                   </span>
                 </span>
-                <CaretRight size={15} weight="bold" className="shrink-0 text-[#2563EB]/60 transition-transform group-active:translate-x-0.5" />
+                <CaretRight size={14} weight="bold" className="shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5" />
               </button>)}
             </div>
           ) : (
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {/* Saudação */}
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2563EB]/70">Já no Caminho</p>
-                <h2 className="mt-0.5 text-[1.05rem] font-black tracking-tight text-slate-900 leading-snug">Acesse sua conta</h2>
-                <p className="mt-0.5 text-[11px] font-medium text-slate-500">Pedidos, endereços e favoritos.</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-800/80">Já no Caminho</p>
+                <h2 className="mt-0.5 text-[1.1rem] font-black tracking-tight text-slate-900 leading-snug">Sua Experiência</h2>
+                <p className="mt-0.5 text-xs font-semibold text-slate-500">Pedidos, chalés favoritos e feiras locais.</p>
               </div>
 
               {/* Dois CTAs lado a lado */}
@@ -595,14 +581,14 @@ export function ProfileDrawer({
                     onLogin();
                     onClose();
                   }}
-                  className="relative flex flex-col items-start overflow-hidden rounded-[1.25rem] bg-[linear-gradient(135deg,#0d526c_0%,#17384a_100%)] p-3 text-white shadow-[0_12px_24px_-16px_rgba(21,58,76,0.45)] transition-all active:scale-[0.97]"
+                  className="relative flex flex-col items-start overflow-hidden rounded-[1.2rem] bg-[linear-gradient(135deg,#0E4B3E_0%,#166534_100%)] p-3 text-white shadow-sm transition-all active:scale-[0.97]"
                 >
-                  <div className="pointer-events-none absolute -right-3 -top-3 h-16 w-16 rounded-full bg-white/8 blur-2xl" />
-                  <div className="mb-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/15">
+                  <div className="pointer-events-none absolute -right-3 -top-3 h-16 w-16 rounded-full bg-white/10 blur-2xl" />
+                  <div className="mb-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/20">
                     <ArrowRight size={15} weight="bold" />
                   </div>
                   <p className="text-[13px] font-black leading-none">Entrar</p>
-                  <p className="mt-1 text-[9.5px] font-semibold text-white/60 leading-tight">Já tenho conta</p>
+                  <p className="mt-1 text-[9.5px] font-semibold text-emerald-100/70 leading-tight">Já tenho conta</p>
                 </button>
 
                 {/* Criar conta */}
@@ -612,30 +598,20 @@ export function ProfileDrawer({
                     onRegisterClient();
                     onClose();
                   }}
-                  className="relative flex flex-col items-start overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white p-3 text-slate-800 shadow-[0_4px_14px_-8px_rgba(15,23,42,0.1)] transition-all active:scale-[0.97] hover:border-[#2563EB]/20 hover:shadow-[0_6px_18px_-8px_rgba(51,104,134,0.15)]"
+                  className="relative flex flex-col items-start overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white p-3 text-slate-800 shadow-2xs transition-all active:scale-[0.97] hover:border-emerald-500/30"
                 >
-                  <div className="mb-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-[#2563EB]/10 text-[#2563EB]">
+                  <div className="mb-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
                     <RocketLaunch size={15} weight="duotone" />
                   </div>
                   <p className="text-[13px] font-black leading-none text-slate-900">Criar conta</p>
-                  <p className="mt-1 text-[9.5px] font-semibold text-slate-400 leading-tight">Sou novo aqui</p>
+                  <p className="mt-1 text-[9.5px] font-semibold text-slate-400 leading-tight">Começar agora</p>
                 </button>
               </div>
-
-              {/* Arquitetura de identidade (04/10, estudo SouFix; evoluída 07/11): o fluxo do
-                  cliente continua limpo, mas "Entrar" sem sessão agora abre o portal multiperfil
-                  /entrar (Cliente em destaque + Lojista/Entregador/Condomínio/Turismo) — antes o
-                  anônimo não tinha porta de entrada profissional neste app. Quick-switch de sessão
-                  staff salva segue no bloco logado acima. */}
             </div>
           )}
         </div>
 
-        <SmartDrawerScrollArea
-          className="flex-1"
-          contentClassName="px-4 py-3.5 space-y-4"
-          tone={drawerScrollTone}
-        >
+        <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-3.5 space-y-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <nav className="space-y-1.5">
             <p className="mb-2 px-1 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
               {activeContext === 'client'
@@ -684,7 +660,7 @@ export function ProfileDrawer({
               </div>
             ))}
           </nav>
-        </SmartDrawerScrollArea>
+        </div>
 
         <div className="border-t border-slate-100/90 bg-white/70 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl">
           <button

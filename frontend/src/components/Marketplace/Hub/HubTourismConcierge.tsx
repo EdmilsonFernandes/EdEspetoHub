@@ -58,6 +58,9 @@ const DEFAULT_SFX_LISTINGS: ListingItem[] = [
   },
 ];
 
+const DEFAULT_EDITORIAL_BANNER = '/uploads/destinations/destination-banner-sao-francisco-xavier-1778512808488-711203.jpeg';
+const DEFAULT_CHALE_FALLBACK = '/uploads/destinations/hospitality-banner-chaleencantodaserra-1-1778615124850-797047.jpeg';
+
 export function HubTourismConcierge({
   activeContext,
   onOpenContextSheet,
@@ -91,34 +94,41 @@ export function HubTourismConcierge({
 
   // Se o modo chalé está ativo: Concierge do Chalé
   if (isChale) {
-    const banner = activeContext.bannerUrl ? resolveAssetUrl(activeContext.bannerUrl) : null;
+    const rawBanner = activeContext.bannerUrl || DEFAULT_CHALE_FALLBACK;
+    const banner = resolveAssetUrl(rawBanner);
+    const destinationPath = `/destinos/${destinationSlug}`;
     const chaleDetailHref = activeContext.placeSlug
-      ? `/destinos/${destinationSlug}/chales/${activeContext.placeSlug}`
-      : `/destinos/${destinationSlug}`;
+      ? `${destinationPath}/chales/${activeContext.placeSlug}`
+      : destinationPath;
 
     return (
       <section className="order-0 space-y-3 animate-in fade-in slide-in-from-top-2 duration-400">
-        {/* Banner Hero do Chalé Ativo com foto vibrante e cinematográfica */}
-        <div className="relative overflow-hidden rounded-[1.85rem] border border-emerald-950/20 bg-slate-950 text-white shadow-xl min-h-[175px] flex flex-col justify-between p-4 sm:p-5">
-          {banner ? (
-            <img
-              src={banner}
-              alt={activeContext.title}
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 hover:scale-105"
-            />
-          ) : null}
-          {/* Gradiente escuro para legibilidade sem lavar a foto */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/50 to-slate-950/30" />
+        {/* Banner Hero do Chalé Ativo com foto cinematográfica e Glassmorphism */}
+        <div className="relative overflow-hidden rounded-[2rem] border border-white/20 bg-slate-950 text-white shadow-xl min-h-[195px] flex flex-col justify-between p-4 sm:p-5">
+          <img
+            src={banner}
+            alt={activeContext.title}
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+            onError={(e) => {
+              const fallback = resolveAssetUrl(DEFAULT_CHALE_FALLBACK);
+              if (fallback && (e.target as HTMLImageElement).src !== fallback) {
+                (e.target as HTMLImageElement).src = fallback;
+              }
+            }}
+          />
+          {/* Overlay cinematográfico suave */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/55 to-slate-950/30" />
 
+          {/* Top Row: Tag + Botões */}
           <div className="relative z-10 flex items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-2xs font-black uppercase tracking-wider text-emerald-300 backdrop-blur-md border border-white/20">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-2xs font-black uppercase tracking-wider text-emerald-300 backdrop-blur-md border border-white/20 shadow-xs">
               <Mountains size={13} weight="fill" />
               Hospedado no Chalé
             </span>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <Link
                 to={chaleDetailHref}
-                className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-2xs font-black text-white hover:bg-white/25 active:scale-95 backdrop-blur-md border border-white/10"
+                className="inline-flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-2xs font-black text-white hover:bg-white/30 active:scale-95 backdrop-blur-md border border-white/20 transition-all"
               >
                 Ver chalé
                 <CaretRight size={10} weight="bold" />
@@ -126,7 +136,7 @@ export function HubTourismConcierge({
               <button
                 type="button"
                 onClick={onOpenContextSheet}
-                className="inline-flex items-center gap-1 rounded-full bg-emerald-600/90 px-3 py-1 text-2xs font-black text-white hover:bg-emerald-500 active:scale-95 backdrop-blur-md shadow-sm"
+                className="inline-flex items-center gap-1 rounded-full bg-emerald-600/90 px-3 py-1 text-2xs font-black text-white hover:bg-emerald-500 active:scale-95 backdrop-blur-md shadow-sm transition-all"
               >
                 Trocar chalé
                 <CaretRight size={10} weight="bold" />
@@ -134,9 +144,10 @@ export function HubTourismConcierge({
             </div>
           </div>
 
-          <div className="relative z-10 pt-6">
+          {/* Informações do Chalé */}
+          <div className="relative z-10 pt-5">
             <Link to={chaleDetailHref} className="group inline-block">
-              <h3 className="text-xl font-black tracking-tight text-white drop-shadow-md group-hover:text-emerald-300 transition-colors">
+              <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white drop-shadow-md group-hover:text-emerald-300 transition-colors">
                 {activeContext.title}
               </h3>
             </Link>
@@ -145,11 +156,11 @@ export function HubTourismConcierge({
             </p>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/30 px-2.5 py-1 text-2xs font-extrabold text-emerald-200 border border-emerald-400/30 backdrop-blur-sm">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/30 px-3 py-1 text-2xs font-black text-emerald-200 border border-emerald-400/30 backdrop-blur-md shadow-xs">
                 <Sparkle size={11} weight="fill" />
                 Entrega no chalé ativa
               </span>
-              <span className="inline-flex items-center gap-1 rounded-lg bg-white/15 px-2.5 py-1 text-2xs font-extrabold text-white/90 border border-white/10 backdrop-blur-sm">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/18 px-3 py-1 text-2xs font-black text-white border border-white/20 backdrop-blur-md shadow-xs">
                 <ForkKnife size={11} weight="fill" />
                 Cardápio de montanha
               </span>
@@ -157,11 +168,11 @@ export function HubTourismConcierge({
           </div>
         </div>
 
-        {/* Trilho "Por aqui no seu chalé · Experiências & Gastronomia" */}
-        <div className="rounded-[1.6rem] border border-slate-200/80 bg-white p-3.5 shadow-2xs">
-          <div className="flex items-center justify-between gap-2 px-0.5 mb-2.5">
+        {/* Trilho "Experiências ao redor do seu chalé" */}
+        <div className="rounded-[1.75rem] border border-slate-200/80 bg-white p-4 shadow-2xs">
+          <div className="flex items-center justify-between gap-2 px-0.5 mb-3">
             <div>
-              <p className="text-2xs font-black uppercase tracking-[0.18em] text-emerald-800">
+              <p className="text-2xs font-black uppercase tracking-[0.18em] text-[#0E4B3E]">
                 Por aqui · Na montanha
               </p>
               <h4 className="text-sm font-black text-slate-900">
@@ -170,9 +181,9 @@ export function HubTourismConcierge({
             </div>
             <Link
               to={chaleDetailHref}
-              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-2xs font-black uppercase tracking-wider text-emerald-800 border border-emerald-200/80 hover:bg-emerald-100 transition-colors active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-2xs font-black uppercase tracking-wider text-[#0E4B3E] border border-emerald-200/80 hover:bg-emerald-100 transition-colors active:scale-95"
             >
-              Ver guia completo
+              Guia do chalé
               <CaretRight size={10} weight="bold" />
             </Link>
           </div>
@@ -180,13 +191,13 @@ export function HubTourismConcierge({
           <div className="-mx-1 flex gap-2.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {listings.map((item) => {
               const cover = item.bannerUrl ? resolveAssetUrl(item.bannerUrl) : null;
-              const itemLink = chaleDetailHref;
+              const itemLink = `${destinationPath}#experiencias`;
 
               return (
                 <Link
                   key={item.id}
                   to={itemLink}
-                  className="group relative flex w-[170px] shrink-0 flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-50/70 p-2 transition-all hover:bg-white hover:border-emerald-300 hover:shadow-md active:scale-[0.98]"
+                  className="group relative flex w-[175px] shrink-0 flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-50/70 p-2.5 transition-all hover:bg-white hover:border-emerald-300 hover:shadow-md active:scale-[0.98]"
                 >
                   <div className="relative h-20 w-full overflow-hidden rounded-xl bg-slate-200">
                     {cover ? (
@@ -197,7 +208,7 @@ export function HubTourismConcierge({
                         loading="lazy"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-700">
+                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-100 to-teal-100 text-[#0E4B3E]">
                         <Compass size={24} weight="duotone" />
                       </div>
                     )}
@@ -205,7 +216,7 @@ export function HubTourismConcierge({
                       {item.category}
                     </span>
                   </div>
-                  <h5 className="mt-2 line-clamp-1 text-xs font-black text-slate-900 group-hover:text-emerald-800 transition-colors">
+                  <h5 className="mt-2 line-clamp-1 text-xs font-black text-slate-900 group-hover:text-[#0E4B3E] transition-colors">
                     {item.title}
                   </h5>
                   <p className="line-clamp-1 text-2xs font-semibold text-slate-500">
@@ -220,45 +231,60 @@ export function HubTourismConcierge({
     );
   }
 
-  // Se NÃO está em chalé: Banner Editorial ReUI de Destinos da Mantiqueira
+  // Se NÃO está em chalé: Banner Editorial Fotográfico ReUI Ultimate da Mantiqueira
+  const editorialBanner = resolveAssetUrl(DEFAULT_EDITORIAL_BANNER);
+
   return (
-    <section className="order-4 mt-2 overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-gradient-to-br from-slate-950 via-slate-900 to-[#0E4B3E] p-4 text-white shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-2xs font-black uppercase tracking-wider text-emerald-400 border border-emerald-400/20">
+    <section className="order-4 mt-2 overflow-hidden rounded-[2rem] border border-white/20 bg-slate-950 p-4 sm:p-5 text-white shadow-xl relative min-h-[195px] flex flex-col justify-between">
+      {/* Imagem Fotográfica Cinematográfica de Montanha */}
+      <img
+        src={editorialBanner}
+        alt="Serra da Mantiqueira"
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+      />
+      {/* Overlay gradiente suave para leitura perfeita */}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-slate-950/30" />
+
+      {/* Conteúdo Topo */}
+      <div className="relative z-10 flex items-start justify-between gap-3">
+        <div className="min-w-0 max-w-[70%]">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-2xs font-black uppercase tracking-wider text-emerald-300 backdrop-blur-md border border-white/20 shadow-xs">
             <Mountains size={12} weight="fill" />
             Destinos da Mantiqueira
           </span>
-          <h3 className="mt-1.5 text-base font-black tracking-tight text-white sm:text-lg">
+          <h3 className="mt-2 text-base font-black tracking-tight text-white sm:text-xl drop-shadow-sm">
             Fim de semana na serra?
           </h3>
-          <p className="mt-0.5 text-xs font-semibold text-slate-300">
-            Chalés, lareira e gastronomia local entregue na montanha.
+          <p className="mt-0.5 text-xs font-semibold text-slate-200 drop-shadow-sm">
+            Chalés charmosos, lareira e gastronomia local entregue na sua montanha.
           </p>
         </div>
 
         <button
           type="button"
           onClick={onOpenContextSheet}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-600 px-3.5 py-2 text-2xs font-black uppercase tracking-wider text-white shadow-md hover:bg-emerald-500 active:scale-95 transition-all"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-white/95 text-slate-950 px-3.5 py-2 text-2xs font-black uppercase tracking-wider shadow-lg hover:bg-white active:scale-95 transition-all"
         >
-          <SuitcaseRolling size={14} weight="fill" />
+          <SuitcaseRolling size={14} weight="fill" className="text-[#0E4B3E]" />
           Estou na Serra
         </button>
       </div>
 
-      {/* Chips Rápidos de Destino */}
-      <div className="mt-3.5 flex flex-wrap gap-1.5 pt-2 border-t border-white/10">
+      {/* Chips Rápidos de Destino com Glassmorphism */}
+      <div className="relative z-10 mt-4 flex flex-wrap items-center gap-1.5 pt-3 border-t border-white/15">
+        <span className="mr-1 text-[11px] font-black uppercase tracking-wider text-emerald-300">
+          Explorar cidades:
+        </span>
         {[
           { name: 'São Francisco Xavier', slug: 'sao-francisco-xavier' },
-          { name: 'Gonçalves', slug: 'goncalves' },
-          { name: 'São Bento do Sapucaí', slug: 'sao-bento-do-sapucai' },
           { name: 'Monte Verde', slug: 'monte-verde' },
+          { name: 'São Bento do Sapucaí', slug: 'sao-bento-do-sapucai' },
+          { name: 'Gonçalves', slug: 'goncalves' },
         ].map((dest) => (
           <Link
             key={dest.slug}
             to={`/destinos/${dest.slug}`}
-            className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-2xs font-bold text-slate-200 hover:bg-white/20 active:scale-95 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-full bg-black/40 hover:bg-white/25 px-3 py-1 text-2xs font-bold text-white backdrop-blur-md border border-white/20 active:scale-95 transition-all shadow-xs"
           >
             <MapPinLine size={10} weight="fill" className="text-emerald-400" />
             {dest.name}
@@ -268,4 +294,3 @@ export function HubTourismConcierge({
     </section>
   );
 }
-

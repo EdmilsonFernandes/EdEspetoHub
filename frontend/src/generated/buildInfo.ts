@@ -5,16 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.10",
   "versionBaseLabel": "v0.1.10",
-  "versionDisplaySuffix": "3b0a04e6",
-  "versionLabel": "v0.1.10.3b0a04e6",
-  "versionInternal": "0.1.10+20261107.185705.3b0a04e6",
-  "buildId": "0.1.10+20261107.185705.3b0a04e6-20261107.185705-3b0a04e6",
-  "builtAt": "2026-11-07T18:57:05.207Z",
-  "commitHash": "3b0a04e6888630c5a41cdd78557191632c27da4d",
-  "shortHash": "3b0a04e6",
+  "versionDisplaySuffix": "f5f45b26",
+  "versionLabel": "v0.1.10.f5f45b26",
+  "versionInternal": "0.1.10+20261108.134827.f5f45b26",
+  "buildId": "0.1.10+20261108.134827.f5f45b26-20261108.134827-f5f45b26",
+  "builtAt": "2026-11-08T13:48:27.730Z",
+  "commitHash": "f5f45b265dea224863d29e86af66aaf7a7f860d0",
+  "shortHash": "f5f45b26",
   "branch": "main",
   "repositoryUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub",
   "commits": [
+    {
+      "hash": "f5f45b265dea224863d29e86af66aaf7a7f860d0",
+      "shortHash": "f5f45b26",
+      "dateIso": "2026-11-07T16:20:26-03:00",
+      "authorName": "Edmilson Fernandes",
+      "authorEmail": "edmls2008@gmail.com",
+      "subject": "fix(admin): login do lojista encaixa no celular — AuthLayout das outras telas",
+      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/f5f45b265dea224863d29e86af66aaf7a7f860d0"
+    },
     {
       "hash": "3b0a04e6888630c5a41cdd78557191632c27da4d",
       "shortHash": "3b0a04e6",
@@ -275,15 +284,6 @@ export const APP_BUILD_INFO = {
       "authorEmail": "edmls2008@gmail.com",
       "subject": "docs(admin-v2): resultado da validacao + rollback do painel V2",
       "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/d7402d78ce1bc3c4cf7dd95897474301240646c3"
-    },
-    {
-      "hash": "56efd41806980d4fdfafc3ab58238c58c637ce41",
-      "shortHash": "56efd418",
-      "dateIso": "2026-10-30T21:12:09-03:00",
-      "authorName": "Edmilson Fernandes",
-      "authorEmail": "edmls2008@gmail.com",
-      "subject": "feat(admin-v2): painel do lojista V2 completo em /admin/dashboardV2",
-      "commitUrl": "https://github.com/EdmilsonFernandes/EdEspetoHub/commit/56efd41806980d4fdfafc3ab58238c58c637ce41"
     }
   ]
 } as const;

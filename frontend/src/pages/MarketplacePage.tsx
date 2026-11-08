@@ -2246,7 +2246,7 @@ export function MarketplacePage() {
                 <div className="min-w-0">
                   {/* E3 (18/08): guarda-chuva "Seu bairro" unifica Guia+Feiras+Condomínio
                       num só conceito — fim das 3 seções que pareciam 3 apps. */}
-                  <p className="inline-flex items-center gap-1.5 text-2xs font-black uppercase tracking-[0.18em] text-[#2563EB]">
+                  <p className="inline-flex items-center gap-1.5 text-2xs font-black uppercase tracking-[0.18em] text-[#0E4B3E]">
                     <Mountains size={12} weight="duotone" />
                     Seu bairro · explorar
                   </p>
@@ -2256,7 +2256,7 @@ export function MarketplacePage() {
                 </div>
                 <Link
                   to={destinationListHref}
-                  className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-2xs font-black uppercase tracking-[0.14em] text-[#2563EB]"
+                  className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-2xs font-black uppercase tracking-[0.14em] text-[#0E4B3E] hover:bg-emerald-50"
                 >
                   Ver mais
                   <CaretRight size={10} weight="bold" />
@@ -2297,8 +2297,8 @@ export function MarketplacePage() {
                       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.04)_0%,rgba(15,23,42,0)_34%,rgba(15,23,42,0.30)_66%,rgba(15,23,42,0.78)_100%)]" />
                       {/* Glass shimmer on hover */}
                       <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 -skew-x-12 bg-gradient-to-r from-transparent via-white/10 to-transparent z-[1]" />
-                      <div className="jnc-hub-glass-badge absolute left-3 top-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 rounded-full px-2.5 py-1 text-2xs font-black uppercase tracking-[0.13em] text-[#153A4C] ring-1 ring-[#C3D8FB]/70">
-                        <MapPinLine size={10} weight="fill" className="shrink-0 text-[#2563EB]" />
+                      <div className="jnc-hub-glass-badge absolute left-3 top-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 rounded-full px-2.5 py-1 text-2xs font-black uppercase tracking-[0.13em] text-[#153A4C] ring-1 ring-emerald-200/80">
+                        <MapPinLine size={10} weight="fill" className="shrink-0 text-[#0E4B3E]" />
                         <span className="truncate">{formatDestinationMatchLabel(destination)}</span>
                       </div>
                       <div className="relative mt-auto flex min-w-0 flex-1 flex-col justify-end p-3.5">
@@ -2322,7 +2322,7 @@ export function MarketplacePage() {
             </section>
           )}
 
-          {debouncedQuery.length < 2 && condominiums.length > 0 && (
+          {debouncedQuery.length < 2 && condominiums.length > 0 && activeDeliveryContext.type !== 'chale' && (
             <>
             <section
               className={selectedCondominium ? 'order-0 sticky top-[max(env(safe-area-inset-top),0.65rem)] z-30 mb-4' : 'order-6'}
@@ -2446,7 +2446,7 @@ export function MarketplacePage() {
                           <button
                             type="button"
                             onClick={() => openCondominiumPicker('all')}
-                            className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center justify-center rounded-full px-3 py-2 text-2xs font-black uppercase tracking-[0.14em] text-[#2563EB]"
+                            className="jnc-hub-touch jnc-hub-pill inline-flex shrink-0 items-center justify-center rounded-full px-3 py-2 text-2xs font-black uppercase tracking-[0.14em] text-[#0E4B3E] hover:bg-emerald-50"
                           >
                             Ver mais
                           </button>
